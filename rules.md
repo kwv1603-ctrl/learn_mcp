@@ -2,11 +2,11 @@
 
 ## 1. 报告存储规范 (CRITICAL)
 - **禁止使用隐藏目录**：严禁将分析结果、报告、图片保存至 `.gemini/` 或其他系统隐藏文件夹。
-- **默认报告路径**：所有生成的报告必须统一保存至 `file:///Users/dap/Documents/work/project/python/finance/learn_mcp/reports/` 目录下。
+- **默认报告路径**：所有生成的报告必须统一保存至 `./reports/` 目录下。
 - **文件名规范**：使用 `symbol_analysis_YYYYMMDD.md` 格式。
 
 ## 2. 技能与工具使用规范
-- **核心入口**：本项目的所有金融数据分析必须通过 `/Users/dap/Documents/work/project/python/finance/learn_mcp/mega_finance_bridge.py` 进行。
+- **核心入口**：本项目的所有金融数据分析必须通过 `./mega_finance_bridge.py` 进行。
 - **禁止冗余**：不要为每次分析创建新的 runner 脚本，直接通过 Python 调用 bridge 里的 handler 函数。
 - **本地 Skill 优先**：在处理估值、技术面和巴菲特评分时，必须优先使用工作区 `skills/` 目录下的 Python 实现，而不是系统内置的默认逻辑。
 
