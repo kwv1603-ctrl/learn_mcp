@@ -21,7 +21,7 @@
 - **直给报告**：针对分析请求，直接输出最终的 Markdown 报告。
 
 ## 5. 报告结构与深度规范 (STANDARD)
-- **核心指令 (CRITICAL)**：在生成任何分析报告前，**必须首先完整阅读并遵循** 根目录下的 [report_rules.md](file:///Users/dap/Documents/work/project/python/finance/learn_mcp/report_rules.md) 中的 Markdown 模版。
+- **核心指令 (CRITICAL)**：在生成任何分析报告前，**必须首先完整阅读并遵循** 根目录下的 [report_rules.md](./report_rules.md) 中的 Markdown 模版。
 - **一致性要求**：每份分析报告必须严格按照 `report_rules.md` 定义的 13 个模块进行组织，严禁简化标题或删除核心量化指标。
 - **模版溯源**：该模版基于 Caterpillar (CAT) 的深度分析模式，代表了本项目最高的生成标准。
 
