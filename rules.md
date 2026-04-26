@@ -6,7 +6,7 @@
 - **文件名规范**：使用 `symbol_analysis_YYYYMMDD.md` 格式。
 
 ## 2. 技能与工具使用规范
-- **核心入口**：本项目的所有金融数据分析必须通过 `./mega_finance_bridge.py` 进行。
+- **核心入口**：本项目的所有金融数据分析必须通过 `./mega_finance_bridge.py` 中定义的 MCP 接口函数进行调用，而非直接在代码里调用 `subprocess`。
 - **禁止冗余**：不要为每次分析创建新的 runner 脚本，直接通过 Python 调用 bridge 里的 handler 函数。
 - **本地 Skill 优先**：在处理估值、技术面和巴菲特评分时，必须优先使用工作区 `skills/` 目录下的 Python 实现，而不是系统内置的默认逻辑。
 
