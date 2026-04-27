@@ -1,0 +1,62 @@
+{
+  "consensus_signal": "HOLD",
+  "vote_summary": "BUY:1 | SELL:1 | HOLD:3",
+  "strategies": [
+    {
+      "strategy": "MACD Crossover",
+      "type": "Trend Following",
+      "signal": "HOLD",
+      "details": "MACD: 0.0315 | Signal: 0.1795",
+      "params": {
+        "short_window": 7,
+        "long_window": 14
+      }
+    },
+    {
+      "strategy": "KDJ + RSI Filter",
+      "type": "Overbought/Oversold",
+      "signal": "HOLD",
+      "details": "J: -22.6 | D: 48.9 | RSI: 44.3",
+      "params": {
+        "ilong": 9,
+        "isig": 3,
+        "rsi_overbought": 60,
+        "rsi_oversold": 40
+      }
+    },
+    {
+      "strategy": "Stochastic + Bollinger Bands",
+      "type": "Support/Resistance",
+      "signal": "HOLD",
+      "details": "Stoch: 9.3 | Lower BB: 33.21 | Upper BB: 35.92",
+      "params": {
+        "std_dev": 2.0,
+        "overbought": 80,
+        "oversold": 20
+      }
+    },
+    {
+      "strategy": "Mean Reversion",
+      "type": "Mean Reversion",
+      "signal": "BUY",
+      "details": "Z-Score: -1.49 (threshold: \u00b11.0)",
+      "params": {
+        "z_threshold": 1.0,
+        "lookback": 14
+      }
+    },
+    {
+      "strategy": "Mean Reversion + ATR",
+      "type": "Volatility + Trend",
+      "signal": "SELL",
+      "details": "Price below trailing stop \u2014 risk management exit",
+      "params": {
+        "atr_length": 7,
+        "atr_multiplier": 2.0
+      }
+    }
+  ],
+  "symbol": "601899.SS",
+  "period": "6mo",
+  "data_points": 122
+}

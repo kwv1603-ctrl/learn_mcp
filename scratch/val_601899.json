@@ -1,0 +1,19 @@
+{
+  "symbol": "601899.SS",
+  "name": "ZIJIN MINING GROUP CO.LTD",
+  "sector": "Basic Materials",
+  "industry": "Gold",
+  "price": 33.56,
+  "currency": "CNY",
+  "pe_trailing": 14.784142,
+  "pe_forward": 10.704945,
+  "pb": 4.81147,
+  "ps": 2.4206924,
+  "ev_ebitda": 9.705,
+  "dividend_yield": "146.00%",
+  "peg_ratio": 1.68,
+  "graham_intrinsic_value": 87.39,
+  "margin_of_safety": "160.4%",
+  "market_cap": 892384378880,
+  "enterprise_value": 1048318181376
+}

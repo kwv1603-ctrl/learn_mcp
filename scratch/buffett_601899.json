@@ -1,0 +1,65 @@
+{
+  "ticker": "601899.SS",
+  "company_name": "ZIJIN MINING GROUP CO.LTD",
+  "total_score": 19,
+  "total_max_score": 27,
+  "score_percentage": "70%",
+  "current_price": 33.56,
+  "market_cap": 892384378880,
+  "intrinsic_value": 638094335548.8157,
+  "intrinsic_value_per_share": 30.972757138790282,
+  "margin_of_safety": "-28.5%",
+  "dimensions": {
+    "fundamentals": {
+      "score": 4,
+      "max_score": 7,
+      "details": "Strong ROE of 33.8%; High debt to equity ratio of 0.68; Strong operating margins (29.6%); Weak liquidity (current ratio: 1.34)"
+    },
+    "earnings_consistency": {
+      "score": 3,
+      "max_score": 3,
+      "details": "Consistent earnings growth over all periods; Total earnings growth of 158.3% over 4 periods"
+    },
+    "competitive_moat": {
+      "score": 3,
+      "max_score": 5,
+      "details": "Inconsistent ROE: only 0/5 periods >15%; Strong stable margins (avg: 22.3%) indicate pricing power moat; High performance stability (77.3%) suggests strong competitive moat"
+    },
+    "management_quality": {
+      "score": 1,
+      "max_score": 2,
+      "details": "Paying dividends ($17.8B)"
+    },
+    "owner_earnings": {
+      "owner_earnings": 41658081923.45,
+      "components": {
+        "net_income": 51777327785.0,
+        "depreciation": 16215707237.0,
+        "total_capex": 30982297763.0,
+        "estimated_maintenance_capex": 26334953098.55
+      },
+      "details": "Net Income: $51.78B | D&A: $16.22B | Maint CapEx: $26.33B | Owner Earnings: $41.66B"
+    },
+    "intrinsic_value": {
+      "intrinsic_value": 638094335548.8157,
+      "intrinsic_value_per_share": 30.972757138790282,
+      "assumptions": {
+        "stage1_growth": "8.0%",
+        "stage2_growth": "4.0%",
+        "terminal_growth": "2.5%",
+        "discount_rate": "10.0%"
+      },
+      "details": "Stage1 PV: $197.2B | Stage2 PV: $161.1B | Terminal PV: $392.4B | Conservative IV: $638.1B | Per Share: $30.97"
+    },
+    "book_value_growth": {
+      "score": 5,
+      "max_score": 5,
+      "details": "Consistent BV/share growth (Buffett's favorite metric); Excellent BV CAGR: 27.4%"
+    },
+    "pricing_power": {
+      "score": 3,
+      "max_score": 5,
+      "details": "Expanding gross margins = strong pricing power"
+    }
+  }
+}
