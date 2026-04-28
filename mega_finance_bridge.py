@@ -1,7 +1,7 @@
 """
-HyperFinanceBridge v2.1 — MCP Financial Data & Analysis Platform
+HyperFinanceBridge v2.2 — MCP Financial Data & Analysis Platform
 =================================================================
-Supports yfinance (fallback) and IBKR (preferred for US/HK fundamentals).
+Supports yfinance for financial data and analysis.
 """
 import sys
 import os
@@ -20,23 +20,8 @@ from skills.buffett_scoring import run_full_buffett_analysis
 from skills.finagent_strategies import run_all_strategies
 from skills.finagent_reflection import compute_multi_timeframe_reflection
 
-# IBKR Integration
-try:
-    from adapters.ibkr_adapter import IBKRConnector, IBKRTickerAdapter
-    ib_connector = IBKRConnector()
-except ImportError:
-    ib_connector = None
-
 async def get_unified_ticker(symbol):
-    """Returns a ticker object (yfinance or IBKRTickerAdapter)."""
-    if ib_connector:
-        try:
-            ticker = IBKRTickerAdapter(symbol, ib_connector)
-            await ticker.init()
-            if ticker.info or not ticker.income_stmt.empty:
-                return ticker
-        except Exception as e:
-            sys.stderr.write(f"IBKR Init failed: {e}\n")
+    """Returns a yfinance ticker object."""
     return yf.Ticker(symbol)
 
 # ═══════════════════════════════════════════════
