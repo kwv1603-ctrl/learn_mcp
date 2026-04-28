@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 FinAgent Multi-Timeframe Reflection Engine
 ============================================
