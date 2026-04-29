@@ -20,6 +20,25 @@ Dimensions scored:
 import math
 
 
+def _is_missing(value) -> bool:
+    return value is None or (isinstance(value, float) and math.isnan(value))
+
+
+def _fmt_money(value, currency="$") -> str:
+    if _is_missing(value):
+        return "N/A"
+    return f"{currency}{value/1e9:.2f}B"
+
+
+def _period_label(period) -> str:
+    if period is None:
+        return None
+    try:
+        return period.strftime("%Y-%m-%d")
+    except AttributeError:
+        return str(period)
+
+
 # ─────────────────────────────────────────────
 #  1. Fundamental Analysis
 # ─────────────────────────────────────────────
@@ -216,12 +235,49 @@ def analyze_management_quality(cashflow_df) -> dict:
 # ─────────────────────────────────────────────
 #  5. Owner Earnings
 # ─────────────────────────────────────────────
-def calculate_owner_earnings(net_income: float, depreciation: float, capex: float) -> dict:
+def calculate_owner_earnings(
+    net_income: float,
+    depreciation: float,
+    capex: float,
+    *,
+    fiscal_period=None,
+    currency: str = "$",
+    net_income_label: str = None,
+    depreciation_label: str = None,
+    capex_label: str = None,
+    symbol: str = None,
+) -> dict:
     """
     Buffett's Owner Earnings = Net Income + D&A - Maintenance CapEx
     """
-    if any(v is None or (isinstance(v, float) and math.isnan(v)) for v in [net_income, depreciation, capex]):
-        return {"owner_earnings": None, "details": "Missing components for owner earnings"}
+    missing = [
+        name
+        for name, value in [
+            ("net_income", net_income),
+            ("depreciation", depreciation),
+            ("capex", capex),
+        ]
+        if _is_missing(value)
+    ]
+    if missing:
+        return {
+            "owner_earnings": None,
+            "score_status": "incomplete",
+            "missing_components": missing,
+            "fiscal_period": _period_label(fiscal_period),
+            "currency": currency,
+            "data_quality": {
+                "source": "yfinance",
+                "net_income_label": net_income_label,
+                "depreciation_label": depreciation_label,
+                "capex_label": capex_label,
+                "maintenance_capex_method": "max(total_capex * 0.85, depreciation)",
+                "same_period": False,
+                "same_statement_basis": "unknown",
+                "possible_a_share_capex_trap": _is_a_share_symbol(symbol),
+            },
+            "details": "Missing components for owner earnings",
+        }
 
     capex = abs(capex)
     maintenance_capex = max(capex * 0.85, depreciation)  # Conservative estimate
@@ -229,32 +285,99 @@ def calculate_owner_earnings(net_income: float, depreciation: float, capex: floa
 
     return {
         "owner_earnings": owner_earnings,
+        "score_status": "complete",
+        "fiscal_period": _period_label(fiscal_period),
+        "currency": currency,
         "components": {
             "net_income": net_income,
             "depreciation": depreciation,
             "total_capex": capex,
             "estimated_maintenance_capex": maintenance_capex,
         },
+        "data_quality": {
+            "source": "yfinance",
+            "net_income_label": net_income_label,
+            "depreciation_label": depreciation_label,
+            "capex_label": capex_label,
+            "maintenance_capex_method": "max(total_capex * 0.85, depreciation)",
+            "same_period": fiscal_period is not None,
+            "same_statement_basis": "unknown; yfinance statement line items may mix consolidated/common-stockholder labels",
+            "possible_a_share_capex_trap": _is_a_share_symbol(symbol),
+        },
         "details": (
-            f"Net Income: ${net_income/1e9:.2f}B | "
-            f"D&A: ${depreciation/1e9:.2f}B | "
-            f"Maint CapEx: ${maintenance_capex/1e9:.2f}B | "
-            f"Owner Earnings: ${owner_earnings/1e9:.2f}B"
+            f"Net Income: {_fmt_money(net_income, currency)} | "
+            f"D&A: {_fmt_money(depreciation, currency)} | "
+            f"Maint CapEx: {_fmt_money(maintenance_capex, currency)} | "
+            f"Owner Earnings: {_fmt_money(owner_earnings, currency)}"
         ),
+    }
+
+
+def _is_a_share_symbol(symbol: str) -> bool:
+    if not symbol:
+        return False
+    symbol = symbol.upper()
+    return symbol.endswith(".SS") or symbol.endswith(".SH") or symbol.endswith(".SZ")
+
+
+def score_owner_earnings(owner_earnings: float, market_cap: float) -> dict:
+    """Score owner earnings yield for the adjusted /35 score."""
+    if _is_missing(owner_earnings) or _is_missing(market_cap) or market_cap <= 0:
+        return {
+            "score": None,
+            "max_score": 5,
+            "score_status": "incomplete",
+            "details": "Missing owner earnings or market cap; score not fabricated",
+        }
+
+    oe_yield = owner_earnings / market_cap
+    if oe_yield >= 0.08:
+        score = 5
+    elif oe_yield >= 0.06:
+        score = 4
+    elif oe_yield >= 0.04:
+        score = 3
+    elif oe_yield >= 0.02:
+        score = 2
+    elif oe_yield > 0:
+        score = 1
+    else:
+        score = 0
+
+    return {
+        "score": score,
+        "max_score": 5,
+        "score_status": "complete",
+        "owner_earnings_yield": oe_yield,
+        "details": f"Owner earnings yield: {oe_yield:.1%}",
     }
 
 
 # ─────────────────────────────────────────────
 #  6. Intrinsic Value (3-stage DCF)
 # ─────────────────────────────────────────────
-def calculate_intrinsic_value(owner_earnings: float, shares_outstanding: int,
-                               historical_growth: float = None) -> dict:
+def calculate_intrinsic_value(
+    owner_earnings: float,
+    shares_outstanding: int,
+    historical_growth: float = None,
+    *,
+    eps: float = None,
+    risk_free_rate: float = None,
+) -> dict:
     """
     3-stage DCF with Buffett's conservative assumptions.
     Returns total intrinsic value (not per-share).
     """
     if not owner_earnings or not shares_outstanding or shares_outstanding <= 0:
-        return {"intrinsic_value": None, "details": "Missing data for valuation"}
+        return {
+            "intrinsic_value": None,
+            "score_status": "incomplete",
+            "graham": {
+                "status": "incomplete",
+                "details": "Missing owner earnings or shares outstanding",
+            },
+            "details": "Missing data for valuation",
+        }
 
     # Conservative growth estimation
     if historical_growth is not None:
@@ -292,15 +415,19 @@ def calculate_intrinsic_value(owner_earnings: float, shares_outstanding: int,
 
     per_share = conservative_iv / shares_outstanding
 
+    graham = calculate_graham_value(eps, historical_growth, risk_free_rate)
+
     return {
         "intrinsic_value": conservative_iv,
         "intrinsic_value_per_share": per_share,
+        "score_status": "complete",
         "assumptions": {
             "stage1_growth": f"{stage1_growth:.1%}",
             "stage2_growth": f"{stage2_growth:.1%}",
             "terminal_growth": f"{terminal_growth:.1%}",
             "discount_rate": f"{discount_rate:.1%}",
         },
+        "graham": graham,
         "details": (
             f"Stage1 PV: ${stage1_pv/1e9:.1f}B | "
             f"Stage2 PV: ${stage2_pv/1e9:.1f}B | "
@@ -308,6 +435,62 @@ def calculate_intrinsic_value(owner_earnings: float, shares_outstanding: int,
             f"Conservative IV: ${conservative_iv/1e9:.1f}B | "
             f"Per Share: ${per_share:.2f}"
         ),
+    }
+
+
+def calculate_graham_value(eps: float, historical_growth: float = None, risk_free_rate: float = None) -> dict:
+    """Graham value requires an explicit risk-free rate for the adjusted formula."""
+    if _is_missing(eps):
+        return {"status": "incomplete", "details": "Missing EPS; Graham value not calculated"}
+    if _is_missing(risk_free_rate) or risk_free_rate <= 0:
+        return {
+            "status": "incomplete",
+            "eps": eps,
+            "risk_free_rate": risk_free_rate,
+            "details": "Missing explicit risk-free rate; adjusted Graham value not calculated",
+        }
+
+    growth = historical_growth if historical_growth is not None else 0.03
+    growth = max(-0.05, min(growth, 0.15))
+    growth_pct = growth * 100
+    base_value = eps * (8.5 + 2 * growth_pct)
+    adjusted_value = base_value * (4.4 / (risk_free_rate * 100))
+    return {
+        "status": "complete",
+        "eps": eps,
+        "growth_rate": growth,
+        "risk_free_rate": risk_free_rate,
+        "base_value": base_value,
+        "adjusted_value": adjusted_value,
+        "details": "Adjusted Graham value uses EPS * (8.5 + 2g) * (4.4 / Y)",
+    }
+
+
+def score_intrinsic_value(margin_of_safety: float) -> dict:
+    """Score intrinsic value margin for the adjusted /35 score."""
+    if _is_missing(margin_of_safety):
+        return {
+            "score": None,
+            "max_score": 3,
+            "score_status": "incomplete",
+            "details": "Missing intrinsic value or market cap; score not fabricated",
+        }
+
+    if margin_of_safety >= 0.50:
+        score = 3
+    elif margin_of_safety >= 0.25:
+        score = 2
+    elif margin_of_safety >= 0:
+        score = 1
+    else:
+        score = 0
+
+    return {
+        "score": score,
+        "max_score": 3,
+        "score_status": "complete",
+        "margin_of_safety": margin_of_safety,
+        "details": f"Margin of safety: {margin_of_safety:.1%}",
     }
 
 
@@ -400,7 +583,12 @@ def analyze_pricing_power(gross_margins: list) -> dict:
 # ─────────────────────────────────────────────
 #  Master Runner
 # ─────────────────────────────────────────────
-def run_full_buffett_analysis(ticker_obj) -> dict:
+def run_full_buffett_analysis(
+    ticker_obj,
+    risk_free_rate: float = None,
+    override_capex: float = None,
+    override_growth: float = None
+) -> dict:
     """
     Run all 8 Buffett scoring dimensions on a yfinance Ticker object.
     Returns structured JSON with all scores + intrinsic value + margin of safety.
@@ -470,28 +658,78 @@ def run_full_buffett_analysis(ticker_obj) -> dict:
     net_income_latest = None
     depreciation_latest = None
     capex_latest = None
+    fiscal_period = None
+    net_income_label = None
+    depreciation_label = None
+    capex_label = None
 
     if income_stmt is not None and not income_stmt.empty:
+        fiscal_period = income_stmt.columns[0] if len(income_stmt.columns) else None
         for label in ["Net Income", "Net Income Common Stockholders"]:
             if label in income_stmt.index:
                 net_income_latest = income_stmt.loc[label].iloc[0]
+                net_income_label = label
                 break
 
     if cashflow is not None and not cashflow.empty:
+        if fiscal_period is None and len(cashflow.columns):
+            fiscal_period = cashflow.columns[0]
         for label in ["Depreciation And Amortization", "Depreciation & Amortization"]:
             if label in cashflow.index:
                 depreciation_latest = cashflow.loc[label].iloc[0]
+                depreciation_label = label
                 break
         for label in ["Capital Expenditure", "Capital Expenditures"]:
             if label in cashflow.index:
                 capex_latest = cashflow.loc[label].iloc[0]
+                capex_label = label
                 break
 
-    oe = calculate_owner_earnings(net_income_latest, depreciation_latest, capex_latest)
+    currency = info.get("financialCurrency") or info.get("currency") or "$"
+    currency_symbol = "$" if currency == "USD" else f"{currency} "
+    symbol = info.get("symbol", "")
+    oe = calculate_owner_earnings(
+        net_income_latest,
+        depreciation_latest,
+        capex_latest if override_capex is None else override_capex,
+        fiscal_period=fiscal_period,
+        currency=currency_symbol,
+        net_income_label=net_income_label,
+        depreciation_label=depreciation_label,
+        capex_label="OVERRIDE" if override_capex is not None else capex_label,
+        symbol=symbol,
+    )
 
     shares = info.get("sharesOutstanding", 0)
-    earnings_growth = info.get("earningsGrowth")
-    iv = calculate_intrinsic_value(oe.get("owner_earnings"), shares, earnings_growth)
+    eps = info.get("trailingEps")
+    
+    implied_cagr = None
+    valid_ni = [ni for ni in net_incomes if ni is not None and not math.isnan(ni)]
+    if len(valid_ni) >= 2:
+        latest_ni, oldest_ni = valid_ni[0], valid_ni[-1]
+        if oldest_ni > 0 and latest_ni > 0:
+            years = len(valid_ni) - 1
+            implied_cagr = ((latest_ni / oldest_ni) ** (1 / years)) - 1
+        elif oldest_ni < 0 < latest_ni:
+            implied_cagr = 0.05
+        else:
+            implied_cagr = 0.0
+            
+    earnings_growth = override_growth
+    if earnings_growth is None:
+        eg_raw = info.get("earningsGrowth")
+        if eg_raw is None or eg_raw > 0.3 or eg_raw < -0.3:
+            earnings_growth = implied_cagr if implied_cagr is not None else 0.03
+        else:
+            earnings_growth = eg_raw
+
+    iv = calculate_intrinsic_value(
+        oe.get("owner_earnings"), 
+        shares, 
+        earnings_growth, 
+        eps=eps, 
+        risk_free_rate=risk_free_rate
+    )
 
     # Margin of Safety
     current_price = info.get("currentPrice", 0)
@@ -535,12 +773,37 @@ def run_full_buffett_analysis(ticker_obj) -> dict:
     pricing_power = analyze_pricing_power(gross_margins)
 
     # Total Score
-    total_score = sum(d["score"] for d in [fundamentals, consistency, moat, mgmt, book_value, pricing_power])
-    total_max = sum(d["max_score"] for d in [fundamentals, consistency, moat, mgmt, book_value, pricing_power])
+    machine_dimensions = [fundamentals, consistency, moat, mgmt, book_value, pricing_power]
+    total_score = sum(d["score"] for d in machine_dimensions)
+    total_max = sum(d["max_score"] for d in machine_dimensions)
+    oe_score = score_owner_earnings(oe.get("owner_earnings"), market_cap)
+    iv_score = score_intrinsic_value(margin_of_safety)
+    adjusted_components = [oe_score, iv_score]
+    adjusted_complete = all(c.get("score_status") == "complete" for c in adjusted_components)
+    adjusted_score = total_score + sum(c["score"] for c in adjusted_components if c.get("score") is not None)
+    adjusted_max = total_max + sum(c["max_score"] for c in adjusted_components)
 
     return {
         "ticker": info.get("symbol", ""),
         "company_name": info.get("shortName", ""),
+        "score_basis": {
+            "machine_score_basis": "27 points from fundamentals, earnings consistency, moat, management, book value growth, and pricing power",
+            "adjusted_score_basis": "35 points = machine /27 + owner earnings /5 + intrinsic value /3",
+        },
+        "machine_score": {
+            "score": total_score,
+            "max_score": total_max,
+            "percentage": f"{total_score/total_max:.0%}" if total_max > 0 else "N/A",
+            "status": "complete",
+        },
+        "adjusted_score": {
+            "score": adjusted_score if adjusted_complete else None,
+            "partial_score": adjusted_score,
+            "max_score": adjusted_max,
+            "percentage": f"{adjusted_score/adjusted_max:.0%}" if adjusted_complete and adjusted_max > 0 else "N/A",
+            "status": "complete" if adjusted_complete else "incomplete",
+            "details": "OE/IV scores are not fabricated when inputs are missing",
+        },
         "total_score": total_score,
         "total_max_score": total_max,
         "score_percentage": f"{total_score/total_max:.0%}" if total_max > 0 else "N/A",
@@ -555,7 +818,9 @@ def run_full_buffett_analysis(ticker_obj) -> dict:
             "competitive_moat": moat,
             "management_quality": mgmt,
             "owner_earnings": oe,
+            "owner_earnings_score": oe_score,
             "intrinsic_value": iv,
+            "intrinsic_value_score": iv_score,
             "book_value_growth": book_value,
             "pricing_power": pricing_power,
         },
