@@ -8,6 +8,8 @@ import asyncio
 import re
 import pandas as pd
 import yfinance as yf
+import sqlite3
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -18,8 +20,127 @@ from skills.finagent_strategies import run_all_strategies
 from skills.finagent_reflection import compute_multi_timeframe_reflection
 
 async def get_unified_ticker(symbol):
-    """Returns a yfinance ticker object."""
-    return yf.Ticker(symbol)
+    """Returns a yfinance ticker object, wrapped in a local data adapter if available."""
+    ticker = yf.Ticker(symbol)
+    
+    # Try to load local data
+    local_annual = _get_local_financials(symbol, quarterly=False)
+    local_quarterly = _get_local_financials(symbol, quarterly=True)
+    
+    if local_annual or local_quarterly:
+        return LocalTickerAdapter(ticker, local_annual, local_quarterly)
+    
+    return ticker
+
+# ═══════════════════════════════════════════════
+#  Local Data Adapter & Priority Logic
+# ═══════════════════════════════════════════════
+
+AV_TO_YF_MAP = {
+    "totalRevenue": "Total Revenue",
+    "grossProfit": "Gross Profit",
+    "operatingIncome": "Operating Income",
+    "ebit": "EBIT",
+    "netIncome": "Net Income",
+    "netIncomeCommonStockholders": "Net Income Common Stockholders",
+    "totalShareholderEquity": "Stockholders Equity",
+    "depreciationAndAmortization": "Depreciation And Amortization",
+    "capitalExpenditures": "Capital Expenditure",
+    "dividendPayout": "Cash Dividends Paid",
+    "proceedsFromRepurchaseOfEquity": "Repurchase Of Capital Stock",
+    "commonStockRepurchased": "Common Stock Repurchased",
+}
+
+def _get_local_financials(symbol, quarterly=False):
+    """Attempt to fetch financial statements from local AlphaVantage SQLite databases."""
+    db_dir = "/Users/dap/Documents/work/project/python/finance/learn_st_list/data/alphavantage"
+    tables = "quarterly_reports" if quarterly else "annual_reports"
+    
+    res = {}
+    statement_configs = [
+        ("income", "income_statement.db"),
+        ("balance", "balance_sheet.db"),
+        ("cashflow", "cash_flow.db")
+    ]
+    
+    for stmt_key, db_file in statement_configs:
+        db_path = os.path.join(db_dir, db_file)
+        if not os.path.exists(db_path):
+            return None
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tables,))
+            if not cursor.fetchone():
+                conn.close()
+                return None
+            
+            df = pd.read_sql(f"SELECT * FROM {tables} WHERE symbol=?", conn, params=(symbol,))
+            conn.close()
+            
+            if df.empty:
+                return None
+                
+            df = df.set_index("fiscalDateEnding")
+            if "symbol" in df.columns:
+                df = df.drop(columns=["symbol"])
+            
+            raw_dict = df.to_dict(orient="index")
+            processed_dict = {}
+            for date, metrics in raw_dict.items():
+                processed_metrics = {}
+                for k, v in metrics.items():
+                    yf_key = AV_TO_YF_MAP.get(k, k)
+                    if v == "None":
+                        processed_metrics[yf_key] = None
+                    else:
+                        try:
+                            processed_metrics[yf_key] = float(v)
+                        except (ValueError, TypeError):
+                            processed_metrics[yf_key] = v
+                processed_dict[str(date)] = processed_metrics
+            res[stmt_key] = processed_dict
+        except Exception:
+            return None
+            
+    return res if len(res) == 3 else None
+
+class LocalTickerAdapter:
+    """Wraps yfinance Ticker to prioritize local AlphaVantage data."""
+    def __init__(self, yf_ticker, local_annual, local_quarterly):
+        self._yf = yf_ticker
+        self.info = yf_ticker.info
+        
+        def dict_to_df(data_dict, key):
+            if not data_dict or key not in data_dict: return None
+            # pd.DataFrame({date: {metric: val}}) gives metrics as index, dates as columns
+            return pd.DataFrame(data_dict[key])
+
+        self.income_stmt = dict_to_df(local_annual, "income")
+        if self.income_stmt is None: self.income_stmt = yf_ticker.income_stmt
+        
+        self.balance_sheet = dict_to_df(local_annual, "balance")
+        if self.balance_sheet is None: self.balance_sheet = yf_ticker.balance_sheet
+        
+        self.cashflow = dict_to_df(local_annual, "cashflow")
+        if self.cashflow is None: self.cashflow = yf_ticker.cashflow
+        
+        self.quarterly_income_stmt = dict_to_df(local_quarterly, "income")
+        if self.quarterly_income_stmt is None: self.quarterly_income_stmt = yf_ticker.quarterly_income_stmt
+        
+        self.quarterly_balance_sheet = dict_to_df(local_quarterly, "balance")
+        if self.quarterly_balance_sheet is None: self.quarterly_balance_sheet = yf_ticker.quarterly_balance_sheet
+        
+        self.quarterly_cashflow = dict_to_df(local_quarterly, "cashflow")
+        if self.quarterly_cashflow is None: self.quarterly_cashflow = yf_ticker.quarterly_cashflow
+        
+        self._is_local = True
+
+    def __getattr__(self, name):
+        return getattr(self._yf, name)
+
+    def history(self, *args, **kwargs):
+        return self._yf.history(*args, **kwargs)
 
 # ═══════════════════════════════════════════════
 #  Tool Handlers (Async)
@@ -90,17 +211,26 @@ def _ticker_metric_summary(symbol):
 
 async def handle_get_financial_statements(symbol, quarterly=False):
     ticker = await get_unified_ticker(symbol)
+    
+    # Check if we are using local data (adapter)
+    is_local = getattr(ticker, "_is_local", False)
+    
     if quarterly:
-        return {
+        res = {
             "income": _financial_df_to_dict(ticker.quarterly_income_stmt),
             "balance": _financial_df_to_dict(ticker.quarterly_balance_sheet),
             "cashflow": _financial_df_to_dict(ticker.quarterly_cashflow)
         }
-    return {
-        "income": _financial_df_to_dict(ticker.income_stmt),
-        "balance": _financial_df_to_dict(ticker.balance_sheet),
-        "cashflow": _financial_df_to_dict(ticker.cashflow)
-    }
+    else:
+        res = {
+            "income": _financial_df_to_dict(ticker.income_stmt),
+            "balance": _financial_df_to_dict(ticker.balance_sheet),
+            "cashflow": _financial_df_to_dict(ticker.cashflow)
+        }
+        
+    if is_local:
+        res["_source"] = "local_alphavantage"
+    return res
 
 async def handle_get_stock_price_history(symbol, period="6mo", interval="1d"):
     ticker = await get_unified_ticker(symbol)
