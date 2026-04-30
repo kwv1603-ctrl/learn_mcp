@@ -230,6 +230,10 @@ async def handle_get_financial_statements(symbol, quarterly=False):
         
     if is_local:
         res["_source"] = "local_alphavantage"
+        
+    if symbol.upper().endswith((".SS", ".SH", ".SZ")):
+        res["_WARNING_ASHARE_CAPEX"] = "A-Share detected. Automated CapEx (Capital Expenditures) data from API may erroneously merge 'Purchases of Intangible Assets' with 'Purchases of Property, Plant and Equipment'. You MUST manually search the company's annual report footnotes to verify the true Maintenance CapEx for Owner Earnings calculations."
+        
     return res
 
 async def handle_get_stock_price_history(symbol, period="6mo", interval="1d"):
@@ -598,6 +602,13 @@ async def handle_validate_report(report_path):
     if re.search(r"bearish|熊市|空头|downtrend", section_10, re.IGNORECASE):
         if re.search(r"强烈买入|买入|Strong Buy|Buy", section_1) and not re.search(r"观望|持有|Watch|Hold", section_1, re.IGNORECASE):
             issues.append({"type": "bearish_rating_constraint", "details": "Bearish technical section conflicts with Buy-style top rating."})
+
+    # A-Share CapEx check
+    is_a_share = bool(re.search(r"\.(SS|SZ|SH)_", path.name, re.IGNORECASE))
+    if is_a_share:
+        section_6_1 = _section_between(text, "### **6.1", "### **6.2")
+        if not re.search(r"附注|合并|手工|拆分", section_6_1):
+            issues.append({"type": "a_share_capex_verification_missing", "details": "A-Share detected, but Section 6.1 lacks proof of manual CapEx footnote verification (missing keywords like 附注, 合并, 拆分)."})
 
     if "股息率" in text and "OE Yield" in text and "倒挂" not in text and "正常" not in text:
         warnings.append({"type": "yield_consistency_unclear", "details": "Dividend yield vs OE Yield check exists but result wording is unclear."})
