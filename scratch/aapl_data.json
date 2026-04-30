@@ -1,0 +1,232 @@
+{
+  "readiness": {
+    "symbol": "AAPL",
+    "status": "ready_with_manual_evidence",
+    "missing_bridge_data": [],
+    "checks": {
+      "valuation": {
+        "status": "ok",
+        "summary": null
+      },
+      "financial_statements": {
+        "status": "ok",
+        "summary": null
+      },
+      "buffett_analysis": {
+        "status": "ok",
+        "summary": null
+      },
+      "strategy_scan": {
+        "status": "ok",
+        "summary": null
+      },
+      "reflection": {
+        "status": "ok",
+        "summary": null
+      },
+      "peer_comparison": {
+        "status": "ok",
+        "summary": null
+      },
+      "macro_context": {
+        "status": "needs_external_rate",
+        "summary": {
+          "market": "USA",
+          "risk_free_rate": null,
+          "risk_free_rate_status": "missing",
+          "source_required": "US 10Y Treasury yield",
+          "as_of": "2026-04-30",
+          "note": "Bridge does not fetch live macro rates; caller must supply/search an official source before Graham rate adjustment."
+        }
+      },
+      "external_evidence": {
+        "status": "required",
+        "summary": "Use environment search/browser for KPI trend, official filings, regulatory events, and analyst/peer evidence."
+      }
+    }
+  },
+  "peers": {
+    "symbol": "AAPL",
+    "peers_requested": [
+      "MSFT",
+      "GOOGL",
+      "META"
+    ],
+    "peer_selection_status": "user_supplied",
+    "peer_selection_note": "Peer list supplied by caller.",
+    "target_sector": "Technology",
+    "target_industry": "Consumer Electronics",
+    "metrics": [
+      {
+        "symbol": "AAPL",
+        "name": "Apple Inc.",
+        "sector": "Technology",
+        "industry": "Consumer Electronics",
+        "roe": 1.5202099,
+        "net_margin": 0.27037,
+        "revenue_growth": 0.157,
+        "pe_ttm": 34.24208,
+        "pb": 45.04335,
+        "dividend_yield": 0.38,
+        "market_cap": 3966403870720,
+        "currency": "USD",
+        "data_status": "ok"
+      },
+      {
+        "symbol": "MSFT",
+        "name": "Microsoft Corporation",
+        "sector": "Technology",
+        "industry": "Software - Infrastructure",
+        "roe": 0.34390998,
+        "net_margin": 0.39044,
+        "revenue_growth": 0.167,
+        "pe_ttm": 26.595238,
+        "pb": 8.067281,
+        "dividend_yield": 0.86,
+        "market_cap": 3154747064320,
+        "currency": "USD",
+        "data_status": "ok"
+      },
+      {
+        "symbol": "GOOGL",
+        "name": "Alphabet Inc.",
+        "sector": "Communication Services",
+        "industry": "Internet Content & Information",
+        "roe": 0.35705003,
+        "net_margin": 0.32810003,
+        "revenue_growth": 0.18,
+        "pe_ttm": 26.672256,
+        "pb": 10.186592,
+        "dividend_yield": 0.24,
+        "market_cap": 4233379446784,
+        "currency": "USD",
+        "data_status": "ok"
+      },
+      {
+        "symbol": "META",
+        "name": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "industry": "Internet Content & Information",
+        "roe": 0.30238,
+        "net_margin": 0.30084,
+        "revenue_growth": 0.238,
+        "pe_ttm": 24.331636,
+        "pb": 7.7925167,
+        "dividend_yield": 0.31,
+        "market_cap": 1698509750272,
+        "currency": "USD",
+        "data_status": "ok"
+      }
+    ],
+    "errors": []
+  },
+  "buffett": {
+    "ticker": "AAPL",
+    "company_name": "Apple Inc.",
+    "score_basis": {
+      "machine_score_basis": "27 points from fundamentals, earnings consistency, moat, management, book value growth, and pricing power",
+      "adjusted_score_basis": "35 points = machine /27 + owner earnings /5 + intrinsic value /3"
+    },
+    "machine_score": {
+      "score": 10,
+      "max_score": 27,
+      "percentage": "37%",
+      "status": "complete"
+    },
+    "adjusted_score": {
+      "score": null,
+      "partial_score": 10,
+      "max_score": 35,
+      "percentage": "N/A",
+      "status": "incomplete",
+      "details": "OE/IV scores are not fabricated when inputs are missing"
+    },
+    "total_score": 10,
+    "total_max_score": 27,
+    "score_percentage": "37%",
+    "current_price": 270.17,
+    "market_cap": 3966403870720,
+    "intrinsic_value": null,
+    "intrinsic_value_per_share": null,
+    "margin_of_safety": "N/A",
+    "dimensions": {
+      "fundamentals": {
+        "score": 4,
+        "max_score": 7,
+        "details": "Strong ROE of 152.0%; High debt to equity ratio of 1.03; Strong operating margins (35.4%); Weak liquidity (current ratio: 0.97)"
+      },
+      "earnings_consistency": {
+        "score": 0,
+        "max_score": 3,
+        "details": "Inconsistent earnings growth pattern; Total earnings growth of 5531.5% over 20 periods"
+      },
+      "competitive_moat": {
+        "score": 1,
+        "max_score": 5,
+        "details": "Inconsistent ROE: only 26/81 periods >15%; Strong stable margins (avg: 26.9%) indicate pricing power moat"
+      },
+      "management_quality": {
+        "score": 1,
+        "max_score": 2,
+        "details": "Company repurchasing shares ($90.7B) \u2014 shareholder-friendly"
+      },
+      "owner_earnings": {
+        "owner_earnings": null,
+        "score_status": "incomplete",
+        "missing_components": [
+          "depreciation"
+        ],
+        "fiscal_period": "2025-09-30",
+        "currency": "$",
+        "data_quality": {
+          "source": "yfinance",
+          "net_income_label": "Net Income",
+          "depreciation_label": null,
+          "capex_label": "Capital Expenditure",
+          "maintenance_capex_method": "max(total_capex * 0.85, depreciation)",
+          "same_period": false,
+          "same_statement_basis": "unknown",
+          "possible_a_share_capex_trap": false
+        },
+        "details": "Missing components for owner earnings"
+      },
+      "owner_earnings_score": {
+        "score": null,
+        "max_score": 5,
+        "score_status": "incomplete",
+        "details": "Missing owner earnings or market cap; score not fabricated"
+      },
+      "intrinsic_value": {
+        "intrinsic_value": null,
+        "score_status": "incomplete",
+        "graham": {
+          "status": "incomplete",
+          "details": "Missing owner earnings or shares outstanding"
+        },
+        "details": "Missing data for valuation"
+      },
+      "intrinsic_value_score": {
+        "score": null,
+        "max_score": 3,
+        "score_status": "incomplete",
+        "details": "Missing intrinsic value or market cap; score not fabricated"
+      },
+      "book_value_growth": {
+        "score": 0,
+        "max_score": 5,
+        "details": "Insufficient book value data"
+      },
+      "pricing_power": {
+        "score": 4,
+        "max_score": 5,
+        "details": "Expanding gross margins = strong pricing power; Good gross margins (39.6%)"
+      }
+    }
+  },
+  "fin_keys": [
+    "income",
+    "balance",
+    "cashflow",
+    "_source"
+  ]
+}
