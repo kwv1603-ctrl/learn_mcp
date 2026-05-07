@@ -574,10 +574,11 @@ async def handle_validate_report(report_path):
             ("年-4", [r"\[年-4\]", r"20\d\d"]),
             ("历史年份", [r"\[年-3\]", r"\[年-2\]", r"\[年-1\]", r"20\d\d"]),
             ("最新年", [r"\[最新年\]", r"20\d\d"]),
+            ("最新季", [r"\[最新季\]", r"20\d\dQ\d"]),
             ("指引", [r"\[指引\]", r"指引", r"Guidance"]),
         ],
         "kpi_trend_rows_missing",
-        min_rows=4,
+        min_rows=5,
     ))
 
     if not all(str(i) in section_6_6 for i in ["1", "2", "3"]):
