@@ -600,6 +600,9 @@ async def handle_validate_report(report_path):
         min_rows=6,
     ))
 
+    if "评级依据" not in section_1 and "Rating Basis" not in section_1:
+        issues.append({"type": "rating_basis_missing", "details": "Section 1 must include a '评级依据 (Rating Basis)' block showing Layer 1 filter status and composite score breakdown per rating_criteria.md."})
+
     if re.search(r"bearish|熊市|空头|downtrend", section_10, re.IGNORECASE):
         if re.search(r"强烈买入|买入|Strong Buy|Buy", section_1) and not re.search(r"观望|持有|Watch|Hold", section_1, re.IGNORECASE):
             issues.append({"type": "bearish_rating_constraint", "details": "Bearish technical section conflicts with Buy-style top rating."})
