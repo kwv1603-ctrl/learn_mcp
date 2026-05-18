@@ -602,6 +602,45 @@ async def handle_validate_report(report_path):
 
     if "评级依据" not in section_1 and "Rating Basis" not in section_1:
         issues.append({"type": "rating_basis_missing", "details": "Section 1 must include a '评级依据 (Rating Basis)' block showing Layer 1 filter status and composite score breakdown per rating_criteria.md."})
+    else:
+        rating_match = re.search(r"\[\[Rating\s*/\s*评级:\s*([^\]]+)\]\]", section_1, re.IGNORECASE)
+        score_match = re.search(r"综合评分:\s*\*{0,2}(\d{1,3})/100", section_1)
+        margin_match = re.search(r"安全边际:\s*(-?\d+(?:\.\d+)?)%", section_1)
+        tech_match = re.search(r"技术面约束:\s*([^\n<]+)", section_1)
+        layer1_match = re.search(r"Layer 1 硬性排除:\s*([^\n<]+)", section_1)
+        
+        if rating_match and score_match and margin_match and tech_match and layer1_match:
+            rating_str = rating_match.group(1).lower()
+            score = int(score_match.group(1))
+            margin = float(margin_match.group(1))
+            tech_str = tech_match.group(1)
+            layer1_str = layer1_match.group(1)
+            
+            if "未触发" in layer1_str:
+                has_tech_constraint = "无" not in tech_str and "无硬性约束" not in tech_str and ("降级" in tech_str or "约束" in tech_str or "hard cap" in tech_str.lower())
+                
+                expected_rating = "unknown"
+                if score >= 80 and margin >= 25 and not has_tech_constraint:
+                    expected_rating = "强烈买入"
+                elif score >= 65 and margin >= 10 and not has_tech_constraint:
+                    expected_rating = "买入"
+                elif score >= 65 and has_tech_constraint:
+                    expected_rating = "持有"
+                elif score >= 50 and not has_tech_constraint:
+                    expected_rating = "持有"
+                elif score >= 50 and has_tech_constraint:
+                    expected_rating = "观望"
+                elif score >= 35:
+                    expected_rating = "观望"
+                else:
+                    expected_rating = "卖出"
+                    
+                if expected_rating == "强烈买入" and "强烈买入" not in rating_str and "strong buy" not in rating_str:
+                    issues.append({"type": "rating_mismatch_layer3", "details": f"Score {score}, Margin {margin}%, no tech constraint -> Expected '强烈买入', got '{rating_match.group(1)}'"})
+                elif expected_rating == "买入" and ("强烈买入" in rating_str or "strong buy" in rating_str):
+                    issues.append({"type": "rating_mismatch_layer3", "details": f"Score {score}, Margin {margin}% -> Does not meet Strong Buy criteria, expected '买入'"})
+                elif expected_rating == "买入" and "买入" not in rating_str and "buy" not in rating_str:
+                    issues.append({"type": "rating_mismatch_layer3", "details": f"Score {score}, Margin {margin}% -> Expected '买入', got '{rating_match.group(1)}'"})
 
     if re.search(r"bearish|熊市|空头|downtrend", section_10, re.IGNORECASE):
         if re.search(r"强烈买入|买入|Strong Buy|Buy", section_1) and not re.search(r"观望|持有|Watch|Hold", section_1, re.IGNORECASE):
