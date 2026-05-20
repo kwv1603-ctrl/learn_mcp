@@ -347,7 +347,7 @@ ROE 15.4% vs OE Yield 8.2% → PB隐含1.87x，实际PB为1.71x → ✅ 极其�
 
 ### **分析师共识**
 23 位分析师覆盖：
-**2 Strong Buy / 8 Buy / 12 Hold / 0 Sell / 1 Strong Sell**
+**2 Strong Buy / 8 Buy / 13 Hold / 0 Sell / 2 Strong Sell**
 - 目标价中值: **$340.00**
 - 目标价区间: $291.00 ~ $385.00
 
