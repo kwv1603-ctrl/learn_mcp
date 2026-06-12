@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>腾讯控股 (00700.HK) 投资分析报告 — 2026-06-25</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a;
+  --green: #00c853; --red: #ff1744; --yellow: #ffc107;
+  --text: #e0e0e0; --text2: #9e9e9e; --blue: #448aff;
+  --accent: #7c4dff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* Decision Card */
+.decision-card {
+  background: linear-gradient(135deg, #1b5e20 0%, #0d3310 50%, #1a1d27 100%);
+  border: 2px solid #00c853; border-radius: 16px; padding: 36px;
+  text-align: center; margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.decision-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(0,200,83,0.08) 0%, transparent 60%); }
+.decision-badge { font-size: 56px; font-weight: 900; letter-spacing: 4px; position: relative; z-index: 1; }
+.decision-sub { font-size: 18px; color: var(--text2); margin-top: 4px; position: relative; z-index: 1; }
+.decision-meta { display: flex; justify-content: center; gap: 32px; margin-top: 20px; flex-wrap: wrap; position: relative; z-index: 1; }
+.meta-item { text-align: center; }
+.meta-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+.meta-value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+.meta-value.green { color: var(--green); }
+.meta-value.red { color: var(--red); }
+.meta-value.yellow { color: var(--yellow); }
+
+/* Card */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.card h2 { font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card h3 { font-size: 16px; margin: 12px 0 8px; color: var(--text2); }
+
+/* Chart wrapper */
+.chart-wrap { position: relative; width: 100%; max-width: 600px; margin: 0 auto; }
+.chart-wrap.wide { max-width: 100%; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text2); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+td.buy { color: var(--green); font-weight: 700; }
+td.sell { color: var(--red); font-weight: 700; }
+td.neutral { color: var(--yellow); }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.tag-green { background: rgba(0,200,83,0.15); color: var(--green); }
+.tag-red { background: rgba(255,23,68,0.15); color: var(--red); }
+.tag-yellow { background: rgba(255,193,7,0.15); color: var(--yellow); }
+.tag-blue { background: rgba(68,138,255,0.15); color: var(--blue); }
+
+/* Collapsible */
+.collapsible { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+.collapsible-header { padding: 14px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.collapsible-header:hover { background: rgba(255,255,255,0.03); }
+.collapsible-header .arrow { transition: transform 0.3s; font-size: 12px; color: var(--text2); }
+.collapsible.open .arrow { transform: rotate(180deg); }
+.collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding: 0 20px; }
+.collapsible.open .collapsible-content { max-height: 8000px; padding: 0 20px 16px; }
+.collapsible-content pre { white-space: pre-wrap; font-size: 13px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; overflow-x: auto; }
+
+/* Footer */
+.footer { text-align: center; padding: 32px 0; color: var(--text2); font-size: 13px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer strong { color: var(--red); }
+
+/* Summary list */
+.summary-list { list-style: none; }
+.summary-list li { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.summary-list li::before { content: '▸ '; color: var(--accent); }
+
+.verdict-box { background: rgba(124,77,255,0.1); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+.verdict-box strong { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- DECISION CARD -->
+<div class="decision-card">
+  <div class="decision-badge" style="color:var(--green)">🟢 BUY</div>
+  <div class="decision-sub">腾讯控股 · 00700.HK · 当前价 463.6 港元</div>
+  <div class="decision-meta">
+    <div class="meta-item"><div class="meta-label">建议仓位</div><div class="meta-value green">30%</div></div>
+    <div class="meta-item"><div class="meta-label">信心水平</div><div class="meta-value yellow">中</div></div>
+    <div class="meta-item"><div class="meta-label">风险等级</div><div class="meta-value yellow">中</div></div>
+    <div class="meta-item"><div class="meta-label">R:R (T1)</div><div class="meta-value green">1.68:1</div></div>
+  </div>
+</div>
+
+<!-- OPERATION PLAN -->
+<div class="card">
+  <h2>📋 最终操作方案</h2>
+  <div class="grid-2">
+    <div>
+      <h3>入场策略</h3>
+      <table>
+        <tr><th>梯队</th><th>仓位</th><th>价位</th><th>条件</th></tr>
+        <tr><td>第一梯队</td><td>18%</td><td>458-462</td><td>限价单立即挂入</td></tr>
+        <tr><td>第二梯队</td><td>8%</td><td>450-455</td><td>自然回调触发</td></tr>
+        <tr><td>第三梯队</td><td>4%</td><td>472 突破</td><td>放量1.2x+MA5上穿MA20</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>目标与止损</h3>
+      <table>
+        <tr><th>类型</th><th>价位</th><th>涨跌</th><th>动作</th></tr>
+        <tr><td>T1 目标</td><td>510</td><td class="buy">+10.2%</td><td>减仓1/3</td></tr>
+        <tr><td>T2 目标</td><td>560</td><td class="buy">+21.7%</td><td>清仓止盈</td></tr>
+        <tr><td>技术止损</td><td>440</td><td class="sell">-4.3%</td><td>减至15%</td></tr>
+        <tr><td>硬止损</td><td>430</td><td class="sell">-6.5%</td><td>全部清仓</td></tr>
+        <tr><td>时间止损</td><td colspan="3">21日后仍&lt;465 → 减半至15%</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- RADAR CHART -->
+<div class="card">
+  <h2>📊 综合评分雷达图</h2>
+  <div class="chart-wrap">
+    <canvas id="radarChart" width="500" height="500"></canvas>
+  </div>
+</div>
+
+<!-- PRICE CHART -->
+<div class="card">
+  <h2>📈 价格走势 & 关键水平</h2>
+  <div class="chart-wrap wide">
+    <canvas id="priceChart" width="800" height="400"></canvas>
+  </div>
+  <p style="font-size:12px;color:var(--text2);margin-top:8px;">注：价格走势为基于关键水平（463.6当前/450布林下轨/472阻力/478前期高点）的示意重构，60日实际数据因 Phase 1 归档中断无法完整还原。</p>
+</div>
+
+<!-- BULL vs BEAR -->
+<div class="card">
+  <h2>⚖️ 多空论点权重对比</h2>
+  <div class="chart-wrap wide">
+    <canvas id="bullbearChart" width="700" height="360"></canvas>
+  </div>
+</div>
+
+<!-- RISK TRIANGLE -->
+<div class="card">
+  <h2>📋 风险评估三角图</h2>
+  <div class="chart-wrap">
+    <canvas id="riskRadar" width="500" height="500"></canvas>
+  </div>
+</div>
+
+<!-- KEY COMPARISON TABLE -->
+<div class="card">
+  <h2>🔄 方案迭代对比</h2>
+  <table>
+    <tr><th>维度</th><th>研究主管</th><th>交易员</th><th>风险主管终裁</th><th>调整理由</th></tr>
+    <tr><td>方向</td><td class="buy">BUY</td><td class="buy">BUY</td><td class="buy">BUY</td><td>一致看多</td></tr>
+    <tr><td>仓位</td><td>40-50%</td><td>40%</td><td><strong>30%</strong></td><td>技术面五线空排，降低风险暴露</td></tr>
+    <tr><td>T1</td><td>520</td><td>500</td><td><strong>510</strong></td><td>估值支撑强于技术阻力</td></tr>
+    <tr><td>T2</td><td>580-600</td><td>560</td><td><strong>560</strong></td><td>维持交易员方案</td></tr>
+    <tr><td>硬止损</td><td>418</td><td>418</td><td><strong>430</strong></td><td>采纳保守方：430确认趋势破坏</td></tr>
+    <tr><td>R:R(T1)</td><td>~3:1</td><td>2.0:1</td><td><strong>1.68:1</strong></td><td>硬止损收紧，仓位保护本金</td></tr>
+  </table>
+</div>
+
+<!-- EXPERT REPORTS -->
+<div class="card">
+  <h2>📝 各阶段专家报告全文</h2>
+
+  <p style="font-size:13px;color:var(--text2);margin-bottom:16px;">⚠️ Phase 1 四份报告（技术/基本面/新闻/情绪）与 Phase 2 多空辩论报告在早前会话中丢失，仅保留 Phase 2 研究主管裁决及之后的所有产出。以下展示现有完整存档。</p>
+
+  <h3>Phase 2 — 研究主管投资计划</h3>
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 02-投资计划.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre>## 研究主管最终裁决：腾讯控股（00700.HK）
+
+### 最终决策：🟢 BUY（买入） | 置信度：65%
+
+**裁决逻辑：非对称风险收益比**
+
+即便空头全部说对（增速放缓+主力流出+技术疲弱），回购+北水在455构建了极难跌破的地板。下行1.9%（至455）vs 上行12-51%（至520-702），赔率1:3以上。
+
+─────────────────────────────
+    腾讯控股（00700.HK）投资计划
+─────────────────────────────
+方向：         🟢 BUY
+置信度：       65%（中等偏高）
+时间框架：     3-6个月
+入场区间：     455 - 465 港元
+仓位建议：     中仓（40-50%）
+第一目标：     520 港元（+12%），2-3个月
+第二目标：     580-600 港元（+25-29%），6个月
+止损价：       418 港元（-10%）
+预警线：       放量跌破450 → 减仓至轻仓（&lt;20%）
+─────────────────────────────
+
+核心逻辑：
+1. 非对称赔率：下行2% vs 上行12-51%
+2. 回购+北水 = 实质性价格地板（日均吸收5-7%成交）
+3. PE 15.86x已隐含增速放缓悲观预期
+4. 微信AI催化剂是时间问题
+5. 95%机构BUY + 均价702目标 = 罕见强共识</pre></div>
+  </div>
+
+  <h3>Phase 3 — 交易员决策</h3>
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 03-交易员决策.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre>## FINAL TRANSACTION PROPOSAL: 🟢 BUY
+标的：00700.HK 腾讯控股 | 当前价：463.6 港元 | 置信度：中高
+
+核心参数：
+- 入场均价：460 港元（两批加权）
+- T1目标：500 港元（+8.7%），2-3个月
+- T2目标：560 港元（+21.7%），6个月
+- 技术止损：440 港元（-4.3%）
+- 硬止损：418 港元（-9.1%）
+- 仓位：40%
+
+分批建仓：
+- 第一笔（立即）：25%，458-464区间
+- 第二笔（条件）：15%，450-455区间
+- 替代方案：突破478回踩确认加仓10%
+
+盈亏比：
+- 技术止损R:R(T1): 2.0:1 ✅
+- 期望收益: +8.17%</pre></div>
+  </div>
+
+  <h3>Phase 4 Step 4.1 — 激进风险分析师</h3>
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 04-激进风险论证.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre># 激进风险分析师 — 完整风险论证
+
+## 核心结论：交易员的方案过于保守
+- 仓位：40% → 55-60%
+- T1：500 → 540（+17.4%）
+- T2：560 → 620（+34.8%）
+- 技术止损：440 → 450
+- 硬止损：418（不变）
+
+## 核心论点
+1. 错失成本巨大：60%仓位 vs 40%仓位，在机构目标702情景下组合收益差10.5%
+2. PE 15.86x是历史低位：历史上低于16x后12个月平均回报超40%
+3. 回购=价格地板：腾讯日购5亿，设440止损就是卖在腾讯自己买入的位置下方
+4. 主力流出29亿被夸大：仅占日均成交4-5%，回购已对冲；北水+回购才是真正信号
+5. 95%机构买入+目标702：激进方案T1=540仅为机构均价的77折
+
+## 建议方案
+- 第一笔35%立即，第二笔25%等回调至455-458
+- T1=540（PE回归18.5x），T2=620（AI全面落地）
+- 组合T1收益10.4% vs 交易员3.5%（3倍差距）
+- 最大组合亏损仅增1.8%</pre></div>
+  </div>
+
+  <h3>Phase 4 Step 4.1 — 保守风险分析师</h3>
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 04-保守风险论证.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre># 保守风险分析师：六大风险论证
+
+## 核心主张：仓位降至15-20%，止损收紧至430
+
+## 六大风险
+1. 均线空头排列+主力加速流出：五线空排，主力连续6日净流出29亿且加速
+2. MACD初金叉+缩量：假金叉概率超60%，需等3-5日确认
+3. 440止损不够深：布林下轨一旦失守，惯性目标408
+4. 微信AI审批：60%+概率延迟或否决，多仓核心假设悬空
+5. 95%机构共识=信息差陷阱："口头唱多、资金做空"
+6. 增速腰斩（22%→11%）：若Q2个位数增长，PE 15.86x变成价值陷阱
+
+## 概率加权期望值：442.5 → 较460亏损-3.8%
+- 乐观20%→520，中性35%→457，悲观30%→415，极端15%→360
+
+## 保守方案
+- 总仓位15-20%（10%@453-458 + 10%确认后）
+- 确认信号四选二：放量>1.2x、MA5上穿MA20、MACD柱连续3日扩大、主力转净流入
+- 止损430（布林下轨下方2.5%缓冲）
+- T1=485（布林上轨），T2=520（MA120阻力）
+- 时间止损：30日后仍低于465则减仓50%</pre></div>
+  </div>
+
+  <h3>Phase 4 Step 4.1 — 中性风险分析师</h3>
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 04-中性风险论证.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre># 中性风险分析师：平衡视角论证
+
+## 核心主张：30%阶梯仓位 + 三级止损 + 对冲工具
+
+## 对交易员的评价
+- 分批建仓思路正确，但第一笔25%偏重（无趋势市场中初始风险过大）
+- T1=500合理保守，T2=560偏乐观
+- 未充分消化"缩量上涨"信号
+
+## 批判激进方
+- PE历史低位≠不会更低（2018年最低~12x，2022年最低~10x）
+- 95%机构买入可能是拥挤信号（边际买家已入场）
+- 微信AI催化剂真实但时机不确定
+
+## 批判保守方
+- 等趋势确认=等涨上去再买，错失估值优势
+- 日均回购5亿=真实价格地板
+- 止损418过于宽松=R:R失衡
+- 主力流出被夸大（日均仅5亿 vs 日均成交80亿+）
+
+## 中性策略
+- 总仓位30%（12%@460-465 + 10%@450-456 + 8%@478-485突破确认）
+- 三级止损：450预警/442减半/430清仓
+- T1=500，保留520可能性
+- 对冲：Covered Call(520)+Put Spread(440/400)
+- 信任权重：北水60-65% > 主力30-35%</pre></div>
+  </div>
+
+  <h3>Phase 4 Step 4.2 — 风险主管终裁（最终决策）</h3>
+  <div class="collapsible open">
+    <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+      📄 04-风险主管终裁.md <span class="arrow">▼</span>
+    </div>
+    <div class="collapsible-content"><pre># [风险主管终裁] 00700.HK 腾讯控股 | 最终裁决：🟢 BUY
+
+## 综合裁决
+
+核心矛盾矩阵：
+| 维度   | 多头信号                    | 空头信号                            | 权重判断    |
+|--------|----------------------------|-------------------------------------|-------------|
+| 估值   | PE 15.86x，5年&lt;15%分位     | 增速22%→11%，若Q2个位数PE被动上升    | 多头胜      |
+| 资金流 | 北水净买入，日回购5亿        | 主力连续6日净流出29亿(日均4.8亿)      | 中性偏多    |
+| 技术面 | MACD初金叉                  | 五线空排，ADX=21，金叉缩量            | 空头胜      |
+| 催化剂 | 微信AI审批进展               | 字节豆包竞争，Fed加息63%概率          | 中性        |
+| 情绪   | 95%机构买入，目标702         | 共识过度可能拥挤                     | 中性        |
+
+## 裁决：🟢 BUY
+
+核心推理链条：
+1. 估值是当前最硬的锚——PE 15.86x处于5年&lt;15%分位，不会被技术面噪音改变。
+   即使按保守的10%增速，Forward PE仅14.5x，已充分定价增速放缓。
+2. 保守方的六大风险已被逐一定价——五线空排？估值低位时技术面滞后是常态。
+   主力流出29亿？仅占日均成交4-5%，被日回购5亿对冲大部分。
+3. 拒绝激进方55-60%仓位——ADX=21无趋势市场中风险过大。
+4. 中性方框架最合理，但在PE 15.86x时"等方向确认"可能永远等不到完美信号。
+
+我接受的风险：技术面弱势（降低仓位）、增速放缓（估值已定价）、主力流出（北水+回购更强）
+我拒绝的风险：激进高仓位、激进浅止损、保守轻仓位、保守极端情景
+
+## 最终操作方案
+
+入场：
+├── 第一梯队 18%（立即）：458-462 港元
+├── 第二梯队 8%（回调触发）：450-455 港元
+└── 第三梯队 4%（突破确认）：放量突破472且MA5上穿MA20
+
+总仓位：30%
+T1：510（+10.2%）| T2：560（+21.7%）
+硬止损：430（-6.5%）| 技术止损：440 → 减至15%
+时间止损：21日后&lt;465 → 减半至15%
+R:R(T1)：1.68:1 | R:R(T2)：3.34:1
+
+一句话总结：腾讯当前估值是"不能不买"的水平，但技术面是"不能多买"的状态。
+30%仓位是两者之间的最优平衡。</pre></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>⚠️ <strong>免责声明</strong>：以上内容由 AI 交易分析团队基于公开信息整理生成，仅供参考，不构成任何投资建议或个股推荐。</p>
+  <p>投资有风险，决策需谨慎。过往表现不代表未来收益。</p>
+  <p style="margin-top:8px;">生成时间：2026-06-25 | 数据来源：NeoData 金融数据服务 | 分析团队：12人协作</p>
+</div>
+
+</div>
+
+<script>
+// ============ RADAR CHART ============
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['技术面', '基本面', '新闻面', '情绪面', '风险面'],
+    datasets: [{
+      label: '腾讯控股 综合评分',
+      data: [4.0, 7.5, 6.0, 6.5, 5.5],
+      backgroundColor: 'rgba(124,77,255,0.25)',
+      borderColor: 'rgba(124,77,255,0.9)',
+      borderWidth: 2.5,
+      pointBackgroundColor: 'rgba(124,77,255,1)',
+      pointBorderColor: '#fff',
+      pointRadius: 5,
+      pointHoverRadius: 7
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#e0e0e0', font: { size: 13 } } } },
+    scales: {
+      r: {
+        beginAtZero: true, max: 10,
+        ticks: { stepSize: 2, color: '#9e9e9e', backdropColor: 'transparent', font: { size: 11 } },
+        pointLabels: { color: '#e0e0e0', font: { size: 13 } },
+        grid: { color: 'rgba(255,255,255,0.08)' },
+        angleLines: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+// ============ PRICE CHART ============
+const ctx = document.getElementById('priceChart').getContext('2d');
+// Approximate 60-day price data based on known levels
+const days = [];
+const prices = [];
+const base = 463.6;
+const rng = 40; // range ~440-480
+const mid = 460;
+for (let i = 0; i < 60; i++) {
+  days.push('D-' + (60-i));
+  // sinusoidal + noise to simulate price movement around key levels
+  let phase = (i / 60) * Math.PI * 3;
+  let trend = (i < 35) ? -0.3 * (35-i) : 0.15 * (i-35); // downtrend then slight recovery
+  let p = mid + Math.sin(phase) * 12 + trend + (Math.random() - 0.5) * 6;
+  // clamp
+  if (i < 10) p = 478 - Math.random() * 5;
+  if (i > 50) p = 462 + Math.random() * 4;
+  prices.push(+p.toFixed(1));
+}
+
+const sma20 = [];
+const sma60_ = [];
+for (let i = 0; i < 60; i++) {
+  if (i >= 19) {
+    let sum = 0; for (let j = i-19; j <= i; j++) sum += prices[j];
+    sma20.push(+(sum/20).toFixed(1));
+  } else sma20.push(null);
+  if (i >= 59) {
+    let sum = 0; for (let j = i-59; j <= i; j++) sum += prices[j];
+    sma60_.push(+(sum/60).toFixed(1));
+  } else sma60_.push(null);
+}
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: days,
+    datasets: [
+      {
+        label: '收盘价', data: prices,
+        borderColor: '#448aff', backgroundColor: 'rgba(68,138,255,0.1)',
+        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+      },
+      {
+        label: 'SMA20', data: sma20,
+        borderColor: '#ffc107', borderWidth: 1.5, pointRadius: 0, borderDash: [5,3], fill: false
+      },
+      {
+        label: 'SMA60', data: sma60_,
+        borderColor: '#ff7043', borderWidth: 1.5, pointRadius: 0, borderDash: [8,4], fill: false
+      },
+      { label: 'T1目标 510', data: Array(60).fill(510), borderColor: 'rgba(0,200,83,0.7)', borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false },
+      { label: 'T2目标 560', data: Array(60).fill(560), borderColor: 'rgba(0,200,83,0.4)', borderWidth: 1.5, borderDash: [4,4], pointRadius: 0, fill: false },
+      { label: '硬止损 430', data: Array(60).fill(430), borderColor: 'rgba(255,23,68,0.7)', borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { labels: { color: '#e0e0e0', font: { size: 11 }, usePointStyle: true, boxWidth: 8 } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + ' 港元' } }
+    },
+    scales: {
+      x: { ticks: { color: '#9e9e9e', font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { min: 420, max: 580, ticks: { color: '#9e9e9e', font: { size: 11 }, callback: v => v + ' HKD' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+    }
+  }
+});
+
+// ============ BULL vs BEAR HORIZONTAL BAR ============
+new Chart(document.getElementById('bullbearChart'), {
+  type: 'bar',
+  data: {
+    labels: [
+      '估值 PE 15.86x 历史低位',
+      '日回购5亿 价格地板',
+      '北水持续净买入',
+      '95%机构BUY 目标702',
+      '微信AI催化剂',
+      '五线空头排列',
+      '主力6日净流出29亿',
+      'MACD缩量假金叉概率60%+',
+      '增速22%→11%腰斩',
+      '95%共识可能拥挤',
+      'Fed加息63%概率'
+    ],
+    datasets: [{
+      label: '多头论点',
+      data: [9, 9, 7, 8, 7, null, null, null, null, null, null],
+      backgroundColor: 'rgba(0,200,83,0.65)',
+      borderColor: 'rgba(0,200,83,0.9)',
+      borderWidth: 1
+    }, {
+      label: '空头论点',
+      data: [null, null, null, null, null, 8, 7, 7, 7, 6, 6],
+      backgroundColor: 'rgba(255,23,68,0.65)',
+      borderColor: 'rgba(255,23,68,0.9)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#e0e0e0', font: { size: 13 } } },
+      tooltip: { callbacks: { label: ctx => '权重: ' + ctx.parsed.x + '/10' } }
+    },
+    scales: {
+      x: { min: 0, max: 10, ticks: { color: '#9e9e9e', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.06)' } },
+      y: { ticks: { color: '#e0e0e0', font: { size: 12 } }, grid: { display: false } }
+    }
+  }
+});
+
+// ============ RISK TRIANGLE RADAR ============
+new Chart(document.getElementById('riskRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['仓位激进', '估值乐观', '上行空间', '风控接受度', '催化剂定价'],
+    datasets: [
+      {
+        label: '激进方 (55-60%仓位)',
+        data: [9, 9, 9, 3, 8],
+        backgroundColor: 'rgba(255,23,68,0.15)',
+        borderColor: 'rgba(255,23,68,0.7)',
+        borderWidth: 2,
+        pointBackgroundColor: '#ff1744'
+      },
+      {
+        label: '保守方 (15-20%仓位)',
+        data: [2, 5, 4, 9, 3],
+        backgroundColor: 'rgba(68,138,255,0.15)',
+        borderColor: 'rgba(68,138,255,0.7)',
+        borderWidth: 2,
+        pointBackgroundColor: '#448aff'
+      },
+      {
+        label: '★★ 最终方案 (30%仓位)',
+        data: [5, 7, 6, 7, 5],
+        backgroundColor: 'rgba(0,200,83,0.22)',
+        borderColor: 'rgba(0,200,83,0.95)',
+        borderWidth: 3,
+        pointBackgroundColor: '#00c853',
+        pointRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#e0e0e0', font: { size: 12 } } } },
+    scales: {
+      r: {
+        beginAtZero: true, max: 10,
+        ticks: { stepSize: 2, color: '#9e9e9e', backdropColor: 'transparent', font: { size: 10 } },
+        pointLabels: { color: '#e0e0e0', font: { size: 12 } },
+        grid: { color: 'rgba(255,255,255,0.08)' },
+        angleLines: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

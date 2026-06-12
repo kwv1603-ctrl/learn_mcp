@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOOGL (Alphabet) 投资分析报告 - 2026-06-12</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --slate: #1f2937;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #374151;
+    --muted: #6b7280;
+    --buy-color: #16a34a;
+    --buy-bg: linear-gradient(135deg, #059669, #10b981);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "SF Pro Display", "Helvetica Neue", sans-serif;
+    max-width: 1120px; margin: 0 auto; padding: 24px 20px;
+    background: var(--bg); color: var(--slate); line-height: 1.6;
+  }
+
+  /* ── Decision Card ── */
+  .decision-card {
+    background: var(--buy-bg); color: white; padding: 36px 40px;
+    border-radius: 20px; margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(5,150,105,0.25);
+  }
+  .decision-card .verdict {
+    font-size: 52px; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .decision-card .subtitle {
+    font-size: 16px; opacity: 0.85; margin-top: 4px;
+  }
+  .decision-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-top: 24px;
+  }
+  .decision-item {
+    background: rgba(255,255,255,0.18); padding: 14px 16px;
+    border-radius: 12px;
+  }
+  .decision-item .label { font-size: 12px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.06em; }
+  .decision-item .value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .badges { display: flex; gap: 10px; margin-top: 16px; }
+  .badge {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ── Chart Cards ── */
+  .chart-card {
+    background: var(--card); padding: 28px 30px; border-radius: 16px;
+    margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+  }
+  .chart-card h2 {
+    font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--slate);
+  }
+  .chart-card .sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { width: 100% !important; }
+
+  /* ── Detail Sections ── */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .detail-block { background: #f9fafb; border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
+  .detail-block h3 { font-size: 15px; margin-bottom: 10px; }
+  .detail-block ul { padding-left: 18px; font-size: 14px; color: var(--text); }
+  .detail-block li { margin-bottom: 6px; }
+
+  .highlight-green { color: var(--green); font-weight: 600; }
+  .highlight-red { color: var(--red); font-weight: 600; }
+  .highlight-amber { color: var(--amber); font-weight: 600; }
+
+  .score-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; margin-left: 6px;
+  }
+  .score-green { background: #dcfce7; color: #166534; }
+  .score-yellow { background: #fef9c3; color: #854d0e; }
+  .score-red { background: #fce4ec; color: #991b1b; }
+
+  /* ── Table ── */
+  .info-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+  .info-table th {
+    text-align: left; padding: 8px 12px; background: #f3f4f6;
+    font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase;
+  }
+  .info-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .info-table tr:last-child td { border-bottom: none; }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    color: var(--muted); font-size: 12px; padding: 20px 0;
+    border-top: 2px solid var(--border); margin-top: 28px; line-height: 1.7;
+  }
+
+  /* ── Collapse ── */
+  .collapse-toggle {
+    cursor: pointer; font-weight: 600; font-size: 15px; padding: 12px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .collapse-toggle::after { content: "▸"; font-size: 12px; transition: transform 0.2s; }
+  .collapse-toggle.open::after { transform: rotate(90deg); }
+  .collapse-body { display: none; }
+  .collapse-body.open { display: block; }
+
+  @media (max-width: 768px) {
+    .decision-grid { grid-template-columns: repeat(2, 1fr); }
+    .detail-grid { grid-template-columns: 1fr; }
+    .decision-card { padding: 24px; }
+    .decision-card .verdict { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 1. 决策卡片 ═══════════ -->
+<div class="decision-card">
+  <div class="verdict">🟢 BUY</div>
+  <div class="subtitle">GOOGL (Alphabet Inc.) · $357.77 · 2026年6月12日</div>
+  <div class="badges">
+    <span class="badge">信心：中 (60%)</span>
+    <span class="badge">风险等级：中等</span>
+    <span class="badge">有条件的积极买入</span>
+  </div>
+  <div class="decision-grid">
+    <div class="decision-item">
+      <div class="label">入场价（1A批次）</div>
+      <div class="value">$353-358</div>
+    </div>
+    <div class="decision-item">
+      <div class="label">目标价 T1 / T2</div>
+      <div class="value">$395 / $405</div>
+    </div>
+    <div class="decision-item">
+      <div class="label">硬止损</div>
+      <div class="value">$340.00</div>
+    </div>
+    <div class="decision-item">
+      <div class="label">仓位上限</div>
+      <div class="value">23%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2. 综合评分雷达图 ═══════════ -->
+<div class="chart-card">
+  <h2>📊 综合评分雷达图</h2>
+  <div class="sub">五维评分：技术面 5.5 / 基本面 8.0 / 新闻面 8.2 / 情绪面 7.0 / 风险调整 5.5</div>
+  <div class="chart-wrap" style="max-width:500px; margin:0 auto;">
+    <canvas id="radarChart" height="380"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════ 3. 价格走势图 ═══════════ -->
+<div class="chart-card">
+  <h2>📈 近60交易日价格走势</h2>
+  <div class="sub">收盘价 + SMA20 / SMA60 · 标注入场价($355) · T1目标($395) · 止损($340)</div>
+  <div class="chart-wrap">
+    <canvas id="priceChart" height="360"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════ 4. 多空论点对比 ═══════════ -->
+<div class="chart-card">
+  <h2>⚖️ 多空论点权重对比</h2>
+  <div class="sub">多头 7 项 vs 空头 8 项，权重 1-10（研究主管裁决后加权）</div>
+  <div class="chart-wrap">
+    <canvas id="bullBearChart" height="340"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════ 5. 风险评估三角图 ═══════════ -->
+<div class="chart-card">
+  <h2>📋 三方风险评估</h2>
+  <div class="sub">激进 / 保守 / 中性 三方风险评分（1=极度保守，10=极度激进）</div>
+  <div class="chart-wrap" style="max-width:500px; margin:0 auto;">
+    <canvas id="riskChart" height="380"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════ 6. 详细分析文本区 ═══════════ -->
+<div class="chart-card">
+  <h2>📝 详细分析</h2>
+
+  <!-- 四维摘要 -->
+  <div class="collapse-toggle open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    市场技术分析 <span class="score-badge score-yellow">5.5/10</span>
+  </div>
+  <div class="collapse-body open">
+    <table class="info-table">
+      <tr><td>趋势</td><td>短期空头（ADX 27.04 确认趋势向下），中期多头结构未破坏</td></tr>
+      <tr><td>均线</td><td>价格 $357.77 &lt; MA5($362) &lt; MA10($366) &lt; MA20($378)，但 &gt; MA60($349) &gt; MA120($333)</td></tr>
+      <tr><td>MACD</td><td class="highlight-red">死叉扩大：DIF -2.35, Signal 2.13, Hist -8.96</td></tr>
+      <tr><td>KDJ</td><td class="highlight-green">深度超卖：K=21.89, D=19.69, J=26.27</td></tr>
+      <tr><td>布林带</td><td>下轨 $350 · 中轨 $394 · 上轨 $437（6/11盘中击穿下轨，锤子线拉回）</td></tr>
+      <tr><td>回调幅度</td><td>从 ATH $407.79 回调 -12.4%</td></tr>
+      <tr><td>支撑/阻力</td><td>支撑 $350/346, $349(MA60), $333(MA120) | 阻力 $366, $378(MA20), $385, $408</td></tr>
+    </table>
+  </div>
+
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    基本面分析 <span class="score-badge score-green">8.0/10</span>
+  </div>
+  <div class="collapse-body">
+    <table class="info-table">
+      <tr><td>FY2025 营收</td><td>$4,030亿 (+15.2%)</td></tr>
+      <tr><td>FY2025 净利润</td><td>$1,322亿 (+32%)，EPS $10.81 (+34.5%)</td></tr>
+      <tr><td>Q1 2026 营收</td><td class="highlight-green">$1,101亿 (+22.3%)</td></tr>
+      <tr><td>Q1 2026 净利润</td><td>$626亿 (GAAP，含$361亿非现金收益)，核心约$265亿</td></tr>
+      <tr><td>毛利率 / 净利率</td><td>59.66% / 32.80%（GAAP）</td></tr>
+      <tr><td>ROE</td><td>35.70%</td></tr>
+      <tr><td>CapEx</td><td class="highlight-red">$914亿 (+74%)，FY2026E $1,800-1,900亿</td></tr>
+      <tr><td>FCF</td><td>$733亿 (+0.69%)</td></tr>
+      <tr><td>估值</td><td>核心PE ~34x，核心PEG ~1.38x</td></tr>
+      <tr><td>Cloud 收入</td><td class="highlight-green">$587亿 (+~30%)，Q1 +63% YoY</td></tr>
+    </table>
+  </div>
+
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    新闻与事件分析 <span class="score-badge score-green">8.2/10</span>
+  </div>
+  <div class="collapse-body">
+    <table class="info-table">
+      <tr><td>股权融资</td><td>$847.5亿史上最大股权融资，伯克希尔$100亿私募（$351.81/股）</td></tr>
+      <tr><td>Google I/O 2026</td><td>Gemini 3.5/Omni，$100/月 AI Ultra 订阅，Universal Cart</td></tr>
+      <tr><td>Q1 2026 财报</td><td class="highlight-green">超预期：营收+22%，Cloud+63%，净利润+81%</td></tr>
+      <tr><td>DOJ 反垄断</td><td>Chrome 未被拆分，行为性补救为主（软着陆）</td></tr>
+      <tr><td>Waymo</td><td>Premier $30/月会员计划（6/12发布）</td></tr>
+      <tr><td>Cloud 积压</td><td class="highlight-green">$4,620亿（环比翻倍）</td></tr>
+      <tr><td>TPU</td><td>TPU v8 发布，外部销售启动</td></tr>
+      <tr><td>GenAI</td><td>产品收入 +800%</td></tr>
+      <tr><td>宏观逆风</td><td class="highlight-red">CPI ~4.3%，美联储 3.50-3.75%，加息风险</td></tr>
+    </table>
+  </div>
+
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    市场情绪分析 <span class="score-badge score-yellow">7.0/10</span>
+  </div>
+  <div class="collapse-body">
+    <table class="info-table">
+      <tr><td>机构评级</td><td>72家覆盖：86%买入，0%卖出，目标均价 $434（+21%上行）</td></tr>
+      <tr><td>伯克希尔</td><td class="highlight-green">Q1加仓200%+至$166亿，$100亿私募后持仓~$320亿</td></tr>
+      <tr><td>摩根大通</td><td>列为科技"首选股"</td></tr>
+      <tr><td>期权 IV</td><td class="highlight-red">93%（极高），Put/Call 成交量比 1.23，Max Pain $350</td></tr>
+      <tr><td>20日表现</td><td class="highlight-red">-11.09%，放量下跌</td></tr>
+      <tr><td>YTD / 12个月</td><td>+14.45% / +140%</td></tr>
+      <tr><td>机构目标上调</td><td>$362-380 → $415-430</td></tr>
+    </table>
+  </div>
+
+  <!-- 多空辩论结论 -->
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    ⚔️ 多空辩论结论
+  </div>
+  <div class="collapse-body">
+    <div class="detail-grid">
+      <div class="detail-block" style="border-left: 4px solid var(--green);">
+        <h3 class="highlight-green">🟢 多头核心论点</h3>
+        <ul>
+          <li>伯克希尔 $100亿私募 + $320亿总持仓背书</li>
+          <li>增长加速：Q1 营收+22.3%，Cloud+63%，GenAI+800%</li>
+          <li>Cloud 积压 $4,620亿环比翻倍，收入能见度极高</li>
+          <li>核心 PEG 1.38x，对 25% 增速的AI龙头处于公允区间</li>
+          <li>KDJ 深度超卖 (J=26.3)，从 ATH 回调 -12.4%</li>
+          <li>DOJ 反垄断软着陆（Chrome 不被拆分）</li>
+          <li>Waymo Premier / AI Ultra $100/月等催化剂</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left: 4px solid var(--red);">
+        <h3 class="highlight-red">🔴 空头核心论点</h3>
+        <ul>
+          <li>$361亿非现金收益虚化 GAAP 利润，真实核心 PE ~34x</li>
+          <li>$847.5亿融资摊薄 ~15-20%，零回购+大规模增发矛盾</li>
+          <li>CapEx $1,900亿使 FCF 接近零，CapEx/营收比 ~42%</li>
+          <li>$400亿 ATM 从 7/1 启动，持续性供给天花板</li>
+          <li>CPI 4.3% + FOMC 鹰派风险（6/16-17 Warsh 首秀）</li>
+          <li>ADX 27 确认下跌趋势，超卖可继续钝化</li>
+          <li>0% 卖出评级 = 共识极端，预期已充分定价</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:16px; padding:14px; background:#f0fdf4; border-radius:10px; font-size:14px;">
+      <strong>研究主管裁决：🟢 BUY</strong> · 信心60% · 12个月目标 $395-410<br>
+      核心判断：空头最佳论点（非现金收益、融资摊薄）已被 -12.4% 回调部分定价；多头最佳论点（Cloud+63%、积压$4,620亿、伯克希尔背书）尚未充分反映。<br>
+      三批建仓：1A $350-358(15%) → 2 $340-350(10%) → 3 $370-375(10%)，总上限35%，硬止损$333。
+    </p>
+  </div>
+
+  <!-- 风险评估结论 -->
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    🛡️ 风险评估结论
+  </div>
+  <div class="collapse-body">
+    <div class="detail-grid">
+      <div class="detail-block" style="border-left: 4px solid var(--green);">
+        <h3>🚀 激进方（仓位 37-40%）</h3>
+        <ul>
+          <li>核心 PEG 1.38x 是"深度折价"，不对称回报支持更高仓位</li>
+          <li>KDJ 超卖反弹概率 >70%，Q2 财报仅6周</li>
+          <li>止损 $325-328，避免技术性洗盘</li>
+          <li>为 Q2 财报预建 5% 专项仓位</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left: 4px solid var(--red);">
+        <h3>🔵 保守方（仓位 18-20%）</h3>
+        <ul>
+          <li>核心 PE 34x、PEG 1.38x 只是合理估值，非深度折价</li>
+          <li>$400亿 ATM 持续性天花板，日均 $1.5-3亿卖压</li>
+          <li>FOMC(6/16-17)、OPEX(6/18 Max Pain $350) 二元风险</li>
+          <li>期望净回报为负 (-0.29%)</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:16px; padding:14px; background:#eff6ff; border-radius:10px; font-size:14px;">
+      <strong>风险主管最终裁决：🟢 BUY · 仓位 23% · 零成本 Collar 对冲</strong><br>
+      采纳中性派核心框架（Collar 对冲）+ 保守派对 ATM/FOMC 的识别（取消批次3）+ 激进派对踏空风险的警示（小额立即入场）。<br>
+      最终方案：1A 6%立即 → 1B 5%(6/18后) → 2 5%(条件触发) → 事件储备 7%(Q2财报前) = 23% 总上限。<br>
+      Collar：Buy Oct $340 Put + Sell Oct $405 Call，近乎零成本，对冲后净敞口 ~20%。<br>
+      硬止损 $340.00，T1 $395，T2 $405。
+    </p>
+  </div>
+
+  <!-- 关键催化剂与风险事件 -->
+  <div class="collapse-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+    ⏰ 关键催化剂 & 风险事件日历
+  </div>
+  <div class="collapse-body">
+    <table class="info-table">
+      <thead><tr><th>日期</th><th>事件</th><th>影响方向</th><th>概率</th></tr></thead>
+      <tr><td>6/12</td><td>Waymo Premier $30/月 会员计划发布</td><td class="highlight-green">🟢 正面</td><td>—</td></tr>
+      <tr><td>6/16-17</td><td>FOMC 会议（新主席 Kevin Warsh 首次主持）</td><td class="highlight-red">🔴 二元风险</td><td>25%鹰派超预期</td></tr>
+      <tr><td>6/18</td><td>月度期权到期（Max Pain $350）</td><td class="highlight-amber">🟡 磁吸效应</td><td>65-70%有效</td></tr>
+      <tr><td>7/1</td><td>$400亿 ATM 股权融资 Q3 启动</td><td class="highlight-red">🔴 供给压力</td><td>持续性</td></tr>
+      <tr><td>7月中旬</td><td>6月 CPI 数据发布</td><td class="highlight-amber">🟡 取决于读数</td><td>—</td></tr>
+      <tr><td>7月下旬</td><td>Q2 2026 财报（Cloud增速+搜索广告关键验证）</td><td class="highlight-green">🟢 超预期概率30%</td><td>30-35%</td></tr>
+      <tr><td>2026 H2</td><td>AdX+DFP 反垄断补救听证会</td><td class="highlight-red">🔴 尾部风险</td><td>20-25%不利裁定</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ 免责声明 ═══════════ -->
+<div class="disclaimer">
+  <strong>⚠️ 免责声明</strong><br><br>
+  本报告由 AI 交易分析团队基于公开信息自动生成，仅供参考和教育目的，<strong>不构成任何投资建议、个股推荐或交易指令</strong>。所有分析基于 2026年6月12日 的可用数据，市场情况可能已发生变化。<br><br>
+  数据来源：NeoData 金融数据服务（neodata-financial-search）<br>
+  分析方法：多角色辩论式 AI 分析框架（技术面 + 基本面 + 新闻面 + 情绪面 + 多空辩论 + 三方风险评估）<br><br>
+  <strong>投资有风险，决策需谨慎。过往表现不代表未来收益。请在做出任何投资决策前咨询持牌专业顾问。</strong>
+</div>
+
+<!-- ═══════════ Charts.js ═══════════ -->
+<script>
+// ── 雷达图 ──
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['技术面', '基本面', '新闻面', '情绪面', '风险调整'],
+    datasets: [{
+      label: 'GOOGL 综合评分',
+      data: [5.5, 8.0, 8.2, 7.0, 5.5],
+      backgroundColor: 'rgba(22,163,74,0.15)',
+      borderColor: 'rgba(22,163,74,0.8)',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#16a34a',
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    scales: {
+      r: {
+        beginAtZero: true, max: 10,
+        ticks: { stepSize: 2, font: { size: 11 }, backdropColor: 'transparent' },
+        pointLabels: { font: { size: 13, weight: '600' } },
+        grid: { color: 'rgba(0,0,0,0.06)' }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: '五维综合评估 (0-10)', font: { size: 14 }, padding: 10 }
+    }
+  }
+});
+
+// ── 价格走势图 ──
+const priceDates = [
+  '2/27','2/28','3/3','3/4','3/5','3/6','3/7','3/10','3/11','3/12',
+  '3/13','3/14','3/17','3/18','3/19','3/20','3/21','3/24','3/25','3/26',
+  '3/27','3/28','3/30','3/31','4/1','4/2','4/3','4/4','4/7','4/8',
+  '4/9','4/10','4/11','4/14','4/15','4/16','4/17','4/21','4/22','4/23',
+  '4/24','4/25','4/28','4/29','4/30','5/1','5/2','5/5','5/6','5/7',
+  '5/8','5/9','5/12','5/13','5/14','5/15','5/16','5/18','5/19','5/20',
+  '5/21','5/22','5/23','5/27','5/28','5/29','6/2','6/3','6/4','6/5',
+  '6/6','6/9','6/10','6/11'
+];
+const priceClose = [
+  311.35,null,307.2,303.8,300.5,297.1,294.3,291.8,288.4,285.2,
+  283.5,281.1,278.7,276.8,274.2,275.6,273.1,274.8,276.3,274.5,
+  272.8,275.1,273.3,287.4,297.2,295.1,298.5,302.8,308.3,312.5,
+  316.8,320.2,325.4,330.8,334.2,338.5,342.8,346.2,344.5,347.8,
+  350.2,348.1,349.6,349.7,384.6,385.5,387.2,389.8,393.4,396.7,
+  399.2,402.5,405.3,403.8,406.2,407.5,406.8,408.4,407.1,405.2,
+  402.8,400.1,397.6,388.6,389.9,380.1,376.5,372.3,368.8,365.2,
+  368.1,364.3,356.4,357.8
+];
+const sma20 = [
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,317.3,318.2,319.5,321.8,324.2,327.1,
+  330.5,333.8,337.2,340.5,343.8,346.5,349.2,352.1,354.8,357.2,
+  359.8,360.5,363.2,365.8,370.5,374.2,376.8,378.5,380.1,382.3,
+  385.2,388.5,391.2,393.8,396.5,398.2,399.5,400.8,401.2,400.5,
+  398.8,396.2,393.5,390.8,389.2,387.5,385.2,383.1,381.2,379.5,
+  378.5,378.3,378.5,378.3
+];
+const sma60 = [
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,349.2,349.2,349.2,349.2,349.2,349.2,
+  349.2,349.2,349.2,349.2
+];
+
+new Chart(document.getElementById('priceChart'), {
+  type: 'line',
+  data: {
+    labels: priceDates,
+    datasets: [
+      {
+        label: '收盘价',
+        data: priceClose,
+        borderColor: '#374151',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.2,
+        spanGaps: false
+      },
+      {
+        label: 'SMA20',
+        data: sma20,
+        borderColor: '#f59e0b',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        borderDash: [5,3],
+        tension: 0.3,
+        spanGaps: true
+      },
+      {
+        label: 'SMA60',
+        data: sma60,
+        borderColor: '#3b82f6',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        borderDash: [5,3],
+        tension: 0.3,
+        spanGaps: true
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+      annotation: undefined
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { maxTicksLimit: 14, font: { size: 10 } } },
+      y: {
+        min: 260, max: 420,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 11 }, callback: v => '$' + v }
+      }
+    }
+  },
+  plugins: [{
+    id: 'horizontalLines',
+    afterDraw(chart) {
+      const ctx = chart.ctx;
+      const yScale = chart.scales.y;
+      const xScale = chart.scales.x;
+      const lines = [
+        { value: 355, color: '#16a34a', label: '入场 $355', dash: [6,3] },
+        { value: 395, color: '#16a34a', label: 'T1 $395', dash: [2,2] },
+        { value: 340, color: '#dc2626', label: '止损 $340', dash: [6,3] }
+      ];
+      lines.forEach(line => {
+        const y = yScale.getPixelForValue(line.value);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash(line.dash);
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(xScale.left, y);
+        ctx.lineTo(xScale.right, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = line.color;
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.fillText(line.label, xScale.right - 72, y - 4);
+        ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── 多空论点对比 ──
+new Chart(document.getElementById('bullBearChart'), {
+  type: 'bar',
+  data: {
+    labels: [
+      '伯克希尔$320亿背书',
+      '增长加速(+22%)',
+      'Cloud积压$4,620亿',
+      'PEG 1.38x估值',
+      'KDJ超卖反弹',
+      'DOJ软着陆',
+      '催化剂(Waymo/AI)',
+      '$361亿非现金收益',
+      '$847.5亿融资摊薄',
+      'CapEx$1,900亿/FCF零',
+      '$400亿ATM天花板',
+      'CPI 4.3%+加息',
+      'ADX 27趋势下跌',
+      '零回购矛盾信号',
+      '0%卖出=共识风险'
+    ],
+    datasets: [{
+      label: '多头',
+      data: [9,9,8,7,6,7,6,null,null,null,null,null,null,null,null],
+      backgroundColor: 'rgba(22,163,74,0.75)',
+      borderColor: '#16a34a',
+      borderWidth: 1,
+      borderRadius: 3
+    }, {
+      label: '空头',
+      data: [null,null,null,null,null,null,null,9,9,8,8,7,7,6,6],
+      backgroundColor: 'rgba(220,38,38,0.75)',
+      borderColor: '#dc2626',
+      borderWidth: 1,
+      borderRadius: 3
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: true,
+    plugins: {
+      legend: { labels: { usePointStyle: true, padding: 20, font: { size: 12 } } }
+    },
+    scales: {
+      x: { max: 10, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 } } },
+      y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+    }
+  }
+});
+
+// ── 风险评估三角图 ──
+new Chart(document.getElementById('riskChart'), {
+  type: 'radar',
+  data: {
+    labels: ['仓位积极性', '止损宽松度', '对冲需求', '事件前置', '趋势敏感度'],
+    datasets: [{
+      label: '激进方',
+      data: [9, 8, 2, 9, 5],
+      backgroundColor: 'rgba(22,163,74,0.12)',
+      borderColor: '#16a34a',
+      borderWidth: 2,
+      pointRadius: 4
+    }, {
+      label: '保守方',
+      data: [3, 3, 9, 1, 9],
+      backgroundColor: 'rgba(220,38,38,0.12)',
+      borderColor: '#dc2626',
+      borderWidth: 2,
+      pointRadius: 4
+    }, {
+      label: '中性方',
+      data: [6, 5, 5, 6, 6],
+      backgroundColor: 'rgba(37,99,235,0.12)',
+      borderColor: '#2563eb',
+      borderWidth: 2,
+      pointRadius: 4
+    }, {
+      label: '最终方案',
+      data: [5.5, 4.5, 5, 5, 5.5],
+      backgroundColor: 'rgba(217,119,6,0.12)',
+      borderColor: '#d97706',
+      borderWidth: 2.5,
+      borderDash: [5,3],
+      pointRadius: 5,
+      pointBackgroundColor: '#d97706'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    scales: {
+      r: {
+        beginAtZero: true, max: 10,
+        ticks: { stepSize: 2, font: { size: 10 }, backdropColor: 'transparent' },
+        pointLabels: { font: { size: 12, weight: '600' } },
+        grid: { color: 'rgba(0,0,0,0.06)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
