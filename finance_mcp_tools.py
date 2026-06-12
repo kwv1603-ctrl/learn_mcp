@@ -53,7 +53,7 @@ AV_TO_YF_MAP = {
 
 def _get_local_financials(symbol, quarterly=False):
     """Attempt to fetch financial statements from local AlphaVantage SQLite databases."""
-    db_dir = "/Users/dap/Documents/work/project/python/finance/learn_st_list/data/alphavantage"
+    db_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "learn_st_list", "data", "alphavantage"))
     tables = "quarterly_reports" if quarterly else "annual_reports"
     
     res = {}
