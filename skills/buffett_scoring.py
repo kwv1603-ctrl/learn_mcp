@@ -46,8 +46,11 @@ def analyze_fundamentals(info: dict) -> dict:
     """Score fundamentals based on Buffett's criteria using yfinance info dict."""
     score = 0
     reasoning = []
+    available_max_score = 0
 
     roe = info.get("returnOnEquity")
+    if roe is not None:
+        available_max_score += 2
     if roe and roe > 0.15:
         score += 2
         reasoning.append(f"Strong ROE of {roe:.1%}")
@@ -58,6 +61,7 @@ def analyze_fundamentals(info: dict) -> dict:
 
     de = info.get("debtToEquity")
     if de is not None:
+        available_max_score += 2
         de_ratio = de / 100  # yfinance returns as percentage
         if de_ratio < 0.5:
             score += 2
@@ -68,6 +72,8 @@ def analyze_fundamentals(info: dict) -> dict:
         reasoning.append("Debt to equity data not available")
 
     op_margin = info.get("operatingMargins")
+    if op_margin is not None:
+        available_max_score += 2
     if op_margin and op_margin > 0.15:
         score += 2
         reasoning.append(f"Strong operating margins ({op_margin:.1%})")
@@ -77,6 +83,8 @@ def analyze_fundamentals(info: dict) -> dict:
         reasoning.append("Operating margin data not available")
 
     current_ratio = info.get("currentRatio")
+    if current_ratio is not None:
+        available_max_score += 1
     if current_ratio and current_ratio > 1.5:
         score += 1
         reasoning.append(f"Good liquidity (current ratio: {current_ratio:.2f})")
@@ -85,7 +93,13 @@ def analyze_fundamentals(info: dict) -> dict:
     else:
         reasoning.append("Current ratio data not available")
 
-    return {"score": score, "max_score": 7, "details": "; ".join(reasoning)}
+    return {
+        "score": score,
+        "max_score": 7,
+        "available_max_score": available_max_score,
+        "score_status": "complete" if available_max_score == 7 else "incomplete",
+        "details": "; ".join(reasoning),
+    }
 
 
 # ─────────────────────────────────────────────
@@ -94,7 +108,7 @@ def analyze_fundamentals(info: dict) -> dict:
 def analyze_consistency(net_incomes: list) -> dict:
     """Analyze earnings consistency from annual net income list (newest first)."""
     if len(net_incomes) < 4:
-        return {"score": 0, "max_score": 3, "details": "Insufficient historical data (<4 years)"}
+        return {"score": 0, "max_score": 3, "available_max_score": 0, "score_status": "incomplete", "details": "Insufficient historical data (<4 years)"}
 
     score = 0
     reasoning = []
@@ -115,7 +129,8 @@ def analyze_consistency(net_incomes: list) -> dict:
     else:
         reasoning.append("Insufficient valid earnings data for trend analysis")
 
-    return {"score": score, "max_score": 3, "details": "; ".join(reasoning)}
+    complete = len(valid) >= 4
+    return {"score": score, "max_score": 3, "available_max_score": 3 if complete else 0, "score_status": "complete" if complete else "incomplete", "details": "; ".join(reasoning)}
 
 
 # ─────────────────────────────────────────────
@@ -127,7 +142,7 @@ def analyze_moat(historical_roe: list, historical_margins: list) -> dict:
     Lists should be newest-first, at least 5 periods recommended.
     """
     if len(historical_roe) < 5 and len(historical_margins) < 5:
-        return {"score": 0, "max_score": 5, "details": "Insufficient data for moat analysis"}
+        return {"score": 0, "max_score": 5, "available_max_score": 0, "score_status": "incomplete", "details": "Insufficient data for moat analysis"}
 
     moat_score = 0
     reasoning = []
@@ -186,7 +201,14 @@ def analyze_moat(historical_roe: list, historical_margins: list) -> dict:
             moat_score += 1
             reasoning.append(f"Moderate stability ({overall:.1%})")
 
-    return {"score": min(moat_score, 5), "max_score": 5, "details": "; ".join(reasoning) or "Limited moat analysis"}
+    complete = len(valid_roes) >= 5 and len(valid_margins) >= 5
+    return {
+        "score": min(moat_score, 5),
+        "max_score": 5,
+        "available_max_score": 5 if complete else 0,
+        "score_status": "complete" if complete else "incomplete",
+        "details": "; ".join(reasoning) or "Limited moat analysis",
+    }
 
 
 # ─────────────────────────────────────────────
@@ -198,10 +220,14 @@ def analyze_management_quality(cashflow_df) -> dict:
     reasoning = []
 
     if cashflow_df is None or cashflow_df.empty:
-        return {"score": 0, "max_score": 2, "details": "No cashflow data available"}
+        return {"score": 0, "max_score": 2, "available_max_score": 0, "score_status": "incomplete", "details": "No cashflow data available"}
+
+    buyback_labels = ["Repurchase Of Capital Stock", "Common Stock Repurchased"]
+    dividend_labels = ["Cash Dividends Paid", "Payment Of Dividends", "Common Stock Dividend Paid"]
+    available_max_score = int(any(label in cashflow_df.index for label in buyback_labels)) + int(any(label in cashflow_df.index for label in dividend_labels))
 
     # Check share repurchase (negative = buying back)
-    for label in ["Repurchase Of Capital Stock", "Common Stock Repurchased"]:
+    for label in buyback_labels:
         if label in cashflow_df.index:
             latest = cashflow_df.loc[label].iloc[0]
             if latest is not None and not math.isnan(latest) and latest < 0:
@@ -218,7 +244,7 @@ def analyze_management_quality(cashflow_df) -> dict:
                 break
 
     # Check dividends
-    for label in ["Cash Dividends Paid", "Payment Of Dividends", "Common Stock Dividend Paid"]:
+    for label in dividend_labels:
         if label in cashflow_df.index:
             latest = cashflow_df.loc[label].iloc[0]
             if latest is not None and not math.isnan(latest) and latest < 0:
@@ -229,7 +255,13 @@ def analyze_management_quality(cashflow_df) -> dict:
     if not reasoning:
         reasoning.append("No buyback/dividend data detected")
 
-    return {"score": score, "max_score": 2, "details": "; ".join(reasoning)}
+    return {
+        "score": score,
+        "max_score": 2,
+        "available_max_score": available_max_score,
+        "score_status": "complete" if available_max_score == 2 else "incomplete",
+        "details": "; ".join(reasoning),
+    }
 
 
 # ─────────────────────────────────────────────
@@ -246,6 +278,7 @@ def calculate_owner_earnings(
     depreciation_label: str = None,
     capex_label: str = None,
     symbol: str = None,
+    maintenance_capex_override: float = None,
 ) -> dict:
     """
     Buffett's Owner Earnings = Net Income + D&A - Maintenance CapEx
@@ -255,10 +288,11 @@ def calculate_owner_earnings(
         for name, value in [
             ("net_income", net_income),
             ("depreciation", depreciation),
-            ("capex", capex),
         ]
         if _is_missing(value)
     ]
+    if _is_missing(capex) and _is_missing(maintenance_capex_override):
+        missing.append("capex_or_maintenance_capex_override")
     if missing:
         return {
             "owner_earnings": None,
@@ -271,7 +305,11 @@ def calculate_owner_earnings(
                 "net_income_label": net_income_label,
                 "depreciation_label": depreciation_label,
                 "capex_label": capex_label,
-                "maintenance_capex_method": "max(total_capex * 0.85, depreciation)",
+                "maintenance_capex_method": (
+                    "verified override used exactly"
+                    if not _is_missing(maintenance_capex_override)
+                    else "min(total_capex, max(total_capex * 0.85, depreciation))"
+                ),
                 "same_period": False,
                 "same_statement_basis": "unknown",
                 "possible_a_share_capex_trap": _is_a_share_symbol(symbol),
@@ -279,8 +317,18 @@ def calculate_owner_earnings(
             "details": "Missing components for owner earnings",
         }
 
-    capex = abs(capex)
-    maintenance_capex = max(capex * 0.85, depreciation)  # Conservative estimate
+    total_capex = abs(capex) if not _is_missing(capex) else None
+    if not _is_missing(maintenance_capex_override):
+        maintenance_capex = abs(maintenance_capex_override)
+        maintenance_method = "verified override used exactly"
+        maintenance_value_type = "verified_override"
+    else:
+        # Maintenance CapEx is a subset of current-period total CapEx. Keep the
+        # conservative D&A anchor, but never report a maintenance amount above
+        # the actual total outflow for the same period.
+        maintenance_capex = min(total_capex, max(total_capex * 0.85, abs(depreciation)))
+        maintenance_method = "min(total_capex, max(total_capex * 0.85, depreciation))"
+        maintenance_value_type = "heuristic_estimate"
     owner_earnings = net_income + depreciation - maintenance_capex
 
     return {
@@ -291,15 +339,16 @@ def calculate_owner_earnings(
         "components": {
             "net_income": net_income,
             "depreciation": depreciation,
-            "total_capex": capex,
+            "total_capex": total_capex,
             "estimated_maintenance_capex": maintenance_capex,
+            "maintenance_capex_value_type": maintenance_value_type,
         },
         "data_quality": {
             "source": "yfinance",
             "net_income_label": net_income_label,
             "depreciation_label": depreciation_label,
             "capex_label": capex_label,
-            "maintenance_capex_method": "max(total_capex * 0.85, depreciation)",
+            "maintenance_capex_method": maintenance_method,
             "same_period": fiscal_period is not None,
             "same_statement_basis": "unknown; yfinance statement line items may mix consolidated/common-stockholder labels",
             "possible_a_share_capex_trap": _is_a_share_symbol(symbol),
@@ -320,14 +369,23 @@ def _is_a_share_symbol(symbol: str) -> bool:
     return symbol.endswith(".SS") or symbol.endswith(".SH") or symbol.endswith(".SZ")
 
 
-def score_owner_earnings(owner_earnings: float, market_cap: float) -> dict:
-    """Score owner earnings yield for the adjusted /35 score."""
+def score_owner_earnings(owner_earnings: float, market_cap: float, value_type: str = None) -> dict:
+    """Score Owner Earnings yield as a separate /5 diagnostic."""
     if _is_missing(owner_earnings) or _is_missing(market_cap) or market_cap <= 0:
         return {
             "score": None,
             "max_score": 5,
             "score_status": "incomplete",
             "details": "Missing owner earnings or market cap; score not fabricated",
+        }
+
+    if value_type != "verified_override":
+        return {
+            "score": None,
+            "max_score": 5,
+            "score_status": "estimate_only",
+            "owner_earnings_yield": owner_earnings / market_cap,
+            "details": "Maintenance CapEx is heuristic rather than verified; yield is shown but no diagnostic score is awarded",
         }
 
     oe_yield = owner_earnings / market_cap
@@ -368,23 +426,27 @@ def calculate_intrinsic_value(
     3-stage DCF with Buffett's conservative assumptions.
     Returns total intrinsic value (not per-share).
     """
-    if not owner_earnings or not shares_outstanding or shares_outstanding <= 0:
+    graham = calculate_graham_value(eps, historical_growth, risk_free_rate)
+    if _is_missing(owner_earnings) or not shares_outstanding or shares_outstanding <= 0:
         return {
             "intrinsic_value": None,
             "score_status": "incomplete",
-            "graham": {
-                "status": "incomplete",
-                "details": "Missing owner earnings or shares outstanding",
-            },
+            "graham": graham,
             "details": "Missing data for valuation",
         }
 
-    # Conservative growth estimation
-    if historical_growth is not None:
-        growth = max(-0.05, min(historical_growth, 0.15))
-        conservative_growth = growth * 0.7  # 30% haircut
-    else:
-        conservative_growth = 0.03
+    if _is_missing(historical_growth):
+        return {
+            "intrinsic_value": None,
+            "score_status": "incomplete",
+            "graham": graham,
+            "details": "Missing explicit long-cycle growth input; DCF not calculated",
+        }
+
+    # Conservative growth estimation. The caller supplies a documented EBIT,
+    # Owner Earnings or FCF basis; this function only applies safety caps.
+    growth = max(-0.05, min(historical_growth, 0.15))
+    conservative_growth = growth * 0.7  # 30% haircut
 
     stage1_growth = min(conservative_growth, 0.08)
     stage2_growth = min(conservative_growth * 0.5, 0.04)
@@ -414,8 +476,6 @@ def calculate_intrinsic_value(
     conservative_iv = raw_iv * 0.85  # 15% additional haircut
 
     per_share = conservative_iv / shares_outstanding
-
-    graham = calculate_graham_value(eps, historical_growth, risk_free_rate)
 
     return {
         "intrinsic_value": conservative_iv,
@@ -450,7 +510,15 @@ def calculate_graham_value(eps: float, historical_growth: float = None, risk_fre
             "details": "Missing explicit risk-free rate; adjusted Graham value not calculated",
         }
 
-    growth = historical_growth if historical_growth is not None else 0.03
+    if _is_missing(historical_growth):
+        return {
+            "status": "incomplete",
+            "eps": eps,
+            "risk_free_rate": risk_free_rate,
+            "details": "Missing explicit long-cycle growth input; Graham value not calculated",
+        }
+
+    growth = historical_growth
     growth = max(-0.05, min(growth, 0.15))
     growth_pct = growth * 100
     base_value = eps * (8.5 + 2 * growth_pct)
@@ -467,7 +535,7 @@ def calculate_graham_value(eps: float, historical_growth: float = None, risk_fre
 
 
 def score_intrinsic_value(margin_of_safety: float) -> dict:
-    """Score intrinsic value margin for the adjusted /35 score."""
+    """Score DCF margin of safety as a separate /3 diagnostic."""
     if _is_missing(margin_of_safety):
         return {
             "score": None,
@@ -501,7 +569,7 @@ def analyze_book_value_growth(book_values_per_share: list) -> dict:
     """Analyze book value per share growth. List newest-first."""
     valid = [b for b in book_values_per_share if b is not None and not math.isnan(b)]
     if len(valid) < 3:
-        return {"score": 0, "max_score": 5, "details": "Insufficient book value data"}
+        return {"score": 0, "max_score": 5, "available_max_score": 0, "score_status": "incomplete", "details": "Insufficient book value data"}
 
     score = 0
     reasoning = []
@@ -539,7 +607,7 @@ def analyze_book_value_growth(book_values_per_share: list) -> dict:
         score += 3
         reasoning.append("Improved from negative to positive book value")
 
-    return {"score": min(score, 5), "max_score": 5, "details": "; ".join(reasoning)}
+    return {"score": min(score, 5), "max_score": 5, "available_max_score": 5, "score_status": "complete", "details": "; ".join(reasoning)}
 
 
 # ─────────────────────────────────────────────
@@ -549,7 +617,7 @@ def analyze_pricing_power(gross_margins: list) -> dict:
     """Analyze pricing power from gross margin trend. List newest-first."""
     valid = [m for m in gross_margins if m is not None and not math.isnan(m)]
     if len(valid) < 3:
-        return {"score": 0, "max_score": 5, "details": "Insufficient gross margin data"}
+        return {"score": 0, "max_score": 5, "available_max_score": 0, "score_status": "incomplete", "details": "Insufficient gross margin data"}
 
     score = 0
     reasoning = []
@@ -577,7 +645,7 @@ def analyze_pricing_power(gross_margins: list) -> dict:
         score += 1
         reasoning.append(f"Good gross margins ({avg_margin:.1%})")
 
-    return {"score": min(score, 5), "max_score": 5, "details": "; ".join(reasoning)}
+    return {"score": min(score, 5), "max_score": 5, "available_max_score": 5, "score_status": "complete", "details": "; ".join(reasoning)}
 
 
 # ─────────────────────────────────────────────
@@ -587,7 +655,8 @@ def run_full_buffett_analysis(
     ticker_obj,
     risk_free_rate: float = None,
     override_capex: float = None,
-    override_growth: float = None
+    override_growth: float = None,
+    override_maintenance_capex: float = None,
 ) -> dict:
     """
     Run all 8 Buffett scoring dimensions on a yfinance Ticker object.
@@ -611,6 +680,15 @@ def run_full_buffett_analysis(
                 net_incomes = income_stmt.loc[label].tolist()
                 break
     consistency = analyze_consistency(net_incomes)
+
+    # Long-cycle operating-profit growth is the default valuation base. It is
+    # deliberately kept separate from short-term yfinance earningsGrowth.
+    operating_profits = []
+    if income_stmt is not None and not income_stmt.empty:
+        for label in ["EBIT", "Operating Income"]:
+            if label in income_stmt.index:
+                operating_profits = income_stmt.loc[label].tolist()
+                break
 
     # 3. Moat Analysis — collect historical ROE and margins
     historical_roe = []
@@ -698,30 +776,27 @@ def run_full_buffett_analysis(
         depreciation_label=depreciation_label,
         capex_label="OVERRIDE" if override_capex is not None else capex_label,
         symbol=symbol,
+        maintenance_capex_override=override_maintenance_capex,
     )
 
     shares = info.get("sharesOutstanding", 0)
     eps = info.get("trailingEps")
     
     implied_cagr = None
-    valid_ni = [ni for ni in net_incomes if ni is not None and not math.isnan(ni)]
-    if len(valid_ni) >= 2:
-        latest_ni, oldest_ni = valid_ni[0], valid_ni[-1]
-        if oldest_ni > 0 and latest_ni > 0:
-            years = len(valid_ni) - 1
-            implied_cagr = ((latest_ni / oldest_ni) ** (1 / years)) - 1
-        elif oldest_ni < 0 < latest_ni:
-            implied_cagr = 0.05
-        else:
-            implied_cagr = 0.0
-            
-    earnings_growth = override_growth
-    if earnings_growth is None:
-        eg_raw = info.get("earningsGrowth")
-        if eg_raw is None or eg_raw > 0.3 or eg_raw < -0.3:
-            earnings_growth = implied_cagr if implied_cagr is not None else 0.03
-        else:
-            earnings_growth = eg_raw
+    valid_operating_profits = [
+        value for value in operating_profits
+        if value is not None and not math.isnan(value)
+    ]
+    if len(valid_operating_profits) >= 3:
+        latest_op, oldest_op = valid_operating_profits[0], valid_operating_profits[-1]
+        if oldest_op > 0 and latest_op > 0:
+            years = len(valid_operating_profits) - 1
+            implied_cagr = ((latest_op / oldest_op) ** (1 / years)) - 1
+
+    earnings_growth = override_growth if override_growth is not None else implied_cagr
+    growth_source = "override_growth" if override_growth is not None else (
+        "reported_long_cycle_ebit_cagr" if implied_cagr is not None else "missing"
+    )
 
     iv = calculate_intrinsic_value(
         oe.get("owner_earnings"), 
@@ -737,6 +812,11 @@ def run_full_buffett_analysis(
     margin_of_safety = None
     if iv.get("intrinsic_value") and market_cap:
         margin_of_safety = (iv["intrinsic_value"] - market_cap) / market_cap
+
+    graham_adjusted = iv.get("graham", {}).get("adjusted_value")
+    graham_margin_of_safety = None
+    if graham_adjusted is not None and current_price:
+        graham_margin_of_safety = (graham_adjusted - current_price) / current_price
 
     # 7. Book Value Growth
     bvps_list = []
@@ -776,42 +856,60 @@ def run_full_buffett_analysis(
     machine_dimensions = [fundamentals, consistency, moat, mgmt, book_value, pricing_power]
     total_score = sum(d["score"] for d in machine_dimensions)
     total_max = sum(d["max_score"] for d in machine_dimensions)
-    oe_score = score_owner_earnings(oe.get("owner_earnings"), market_cap)
+    available_machine_max = sum(d.get("available_max_score", 0) for d in machine_dimensions)
+    machine_complete = all(d.get("score_status") == "complete" for d in machine_dimensions)
+    oe_score = score_owner_earnings(
+        oe.get("owner_earnings"),
+        market_cap,
+        oe.get("components", {}).get("maintenance_capex_value_type"),
+    )
     iv_score = score_intrinsic_value(margin_of_safety)
-    adjusted_components = [oe_score, iv_score]
-    adjusted_complete = all(c.get("score_status") == "complete" for c in adjusted_components)
-    adjusted_score = total_score + sum(c["score"] for c in adjusted_components if c.get("score") is not None)
-    adjusted_max = total_max + sum(c["max_score"] for c in adjusted_components)
+    extension_components = [oe_score, iv_score]
+    extension_complete = all(c.get("score_status") == "complete" for c in extension_components)
+    extension_score = sum(c["score"] for c in extension_components if c.get("score") is not None)
+    extension_max = sum(c["max_score"] for c in extension_components)
 
     return {
         "ticker": info.get("symbol", ""),
         "company_name": info.get("shortName", ""),
         "score_basis": {
             "machine_score_basis": "27 points from fundamentals, earnings consistency, moat, management, book value growth, and pricing power",
-            "adjusted_score_basis": "35 points = machine /27 + owner earnings /5 + intrinsic value /3",
+            "extended_diagnostics_basis": "8 diagnostic points = owner earnings /5 + DCF margin /3; these do not re-enter composite quality score",
         },
         "machine_score": {
-            "score": total_score,
+            "score": total_score if machine_complete else None,
+            "partial_score": total_score,
             "max_score": total_max,
-            "percentage": f"{total_score/total_max:.0%}" if total_max > 0 else "N/A",
-            "status": "complete",
+            "available_max_score": available_machine_max,
+            "coverage": f"{available_machine_max/total_max:.0%}" if total_max > 0 else "N/A",
+            "percentage": f"{total_score/total_max:.0%}" if machine_complete and total_max > 0 else "N/A",
+            "status": "complete" if machine_complete else "incomplete",
         },
-        "adjusted_score": {
-            "score": adjusted_score if adjusted_complete else None,
-            "partial_score": adjusted_score,
-            "max_score": adjusted_max,
-            "percentage": f"{adjusted_score/adjusted_max:.0%}" if adjusted_complete and adjusted_max > 0 else "N/A",
-            "status": "complete" if adjusted_complete else "incomplete",
-            "details": "OE/IV scores are not fabricated when inputs are missing",
+        "extended_diagnostics": {
+            "score": extension_score if extension_complete else None,
+            "partial_score": extension_score,
+            "max_score": extension_max,
+            "percentage": f"{extension_score/extension_max:.0%}" if extension_complete and extension_max > 0 else "N/A",
+            "status": "complete" if extension_complete else "incomplete",
+            "details": "Extended OE/DCF diagnostics are not part of composite quality score and are not fabricated when inputs are missing",
         },
-        "total_score": total_score,
+        "total_score": total_score if machine_complete else None,
+        "partial_total_score": total_score,
         "total_max_score": total_max,
-        "score_percentage": f"{total_score/total_max:.0%}" if total_max > 0 else "N/A",
+        "score_percentage": f"{total_score/total_max:.0%}" if machine_complete and total_max > 0 else "N/A",
         "current_price": current_price,
         "market_cap": market_cap,
         "intrinsic_value": iv.get("intrinsic_value"),
         "intrinsic_value_per_share": iv.get("intrinsic_value_per_share"),
-        "margin_of_safety": f"{margin_of_safety:.1%}" if margin_of_safety else "N/A",
+        "margin_of_safety": f"{margin_of_safety:.1%}" if margin_of_safety is not None else "N/A",
+        "dcf_margin_of_safety": margin_of_safety,
+        "graham_margin_of_safety": graham_margin_of_safety,
+        "growth_assumption": {
+            "value": earnings_growth,
+            "source": growth_source,
+            "basis": "long-cycle EBIT CAGR unless explicitly overridden",
+            "caller_review_required": "Remove abnormal periods and bridge EBIT to per-share earnings when used for Graham.",
+        },
         "dimensions": {
             "fundamentals": fundamentals,
             "earnings_consistency": consistency,

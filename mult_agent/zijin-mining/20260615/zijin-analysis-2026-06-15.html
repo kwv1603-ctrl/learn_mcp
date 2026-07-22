@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫金矿业(601899) 投资分析报告 - 2026-06-15</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --gold: #d97706;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .report-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+  }
+  .report-header .logo {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, #b45309, #d97706, #f59e0b);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: white;
+  }
+  .report-header h2 { font-size: 22px; font-weight: 700; }
+  .report-header span { color: var(--muted); font-size: 14px; }
+
+  .decision-card {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .decision-card::after {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .decision-card .badge-row {
+    display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .decision-card .badge {
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+  }
+  .decision-card .badge.buy {
+    background: rgba(255,255,255,0.35); font-size: 15px;
+  }
+  .decision-card h1 {
+    font-size: 72px; font-weight: 900; margin: 8px 0 4px;
+    letter-spacing: -2px;
+  }
+  .decision-card .subtitle {
+    font-size: 15px; opacity: 0.85; margin-bottom: 20px;
+  }
+  .decision-card .metric-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .decision-card .metric-item {
+    background: rgba(255,255,255,0.15);
+    padding: 16px; border-radius: 12px;
+    backdrop-filter: blur(4px);
+  }
+  .decision-card .metric-item .label {
+    font-size: 12px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .decision-card .metric-item .value {
+    font-size: 24px; font-weight: 700; margin-top: 4px;
+  }
+
+  .chart-card {
+    background: var(--card); padding: 28px 32px;
+    border-radius: 16px; margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .chart-card h2 {
+    font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-card h2 .icon { font-size: 22px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { max-height: 360px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .decision-card .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .analysis-section { margin-bottom: 24px; }
+  .analysis-section h3 {
+    font-size: 16px; font-weight: 700; margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--border);
+  }
+  .analysis-section .dim-label {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; margin-right: 8px;
+  }
+  .dim-label.tech { background: #dbeafe; color: #1d4ed8; }
+  .dim-label.fund { background: #d1fae5; color: #059669; }
+  .dim-label.news { background: #fef3c7; color: #b45309; }
+  .dim-label.sent { background: #ede9fe; color: #6d28d9; }
+
+  details { margin-bottom: 12px; }
+  details summary {
+    cursor: pointer; font-weight: 600; font-size: 15px;
+    padding: 10px 14px; background: #f8fafc; border-radius: 8px;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: '▸ '; color: var(--gold); font-size: 12px; }
+  details[open] summary::before { content: '▾ '; }
+  details .content { padding: 14px 18px; font-size: 14px; color: #334155; }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  table th, table td {
+    padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  table th { font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; }
+  table .pos { color: var(--green); font-weight: 600; }
+  table .neg { color: var(--red); font-weight: 600; }
+
+  .stop-rules { list-style: none; }
+  .stop-rules li {
+    padding: 10px 14px; margin-bottom: 8px; border-radius: 8px;
+    border-left: 4px solid var(--red); background: #fef2f2;
+    font-size: 14px;
+  }
+  .stop-rules li strong { color: var(--red); }
+
+  .fomc-scenario {
+    padding: 16px 20px; margin-bottom: 12px; border-radius: 12px;
+    border-left: 4px solid;
+  }
+  .fomc-scenario.dove { border-color: var(--green); background: #f0fdf4; }
+  .fomc-scenario.neutral { border-color: var(--yellow); background: #fffbeb; }
+  .fomc-scenario.hawk { border-color: #f97316; background: #fff7ed; }
+  .fomc-scenario.super-hawk { border-color: var(--red); background: #fef2f2; }
+  .fomc-scenario h4 { margin-bottom: 6px; font-size: 15px; }
+  .fomc-scenario p { font-size: 14px; color: #334155; }
+
+  .confidence-bar {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .confidence-bar .label { font-size: 14px; font-weight: 600; min-width: 100px; }
+  .confidence-bar .bar-bg {
+    flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;
+  }
+  .confidence-bar .bar-fill {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, var(--green), #34d399);
+  }
+  .confidence-bar .score { font-size: 14px; font-weight: 700; min-width: 50px; }
+
+  .disclaimer {
+    color: var(--muted); font-size: 13px; padding: 20px 0 0;
+    border-top: 2px solid var(--border); margin-top: 32px; text-align: center;
+  }
+
+  .highlight-green { color: var(--green); font-weight: 700; }
+  .highlight-red { color: var(--red); font-weight: 700; }
+  .highlight-yellow { color: var(--yellow); font-weight: 700; }
+  .highlight-gold { color: var(--gold); font-weight: 700; }
+
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .pill.win { background: #d1fae5; color: #059669; }
+  .pill.lose { background: #fee2e2; color: #dc2626; }
+  .pill.partial { background: #fef3c7; color: #b45309; }
+
+  .risk-table td:first-child { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- Report Header -->
+<div class="report-header">
+  <div class="logo">紫</div>
+  <div>
+    <h2>紫金矿业(601899.SH) · 交易专家团队分析报告</h2>
+    <span>2026年6月15日 | 收盘价 31.31元(+7.63%) | 分析团队：12位专业分析师协作</span>
+  </div>
+</div>
+
+<!-- 1. Decision Card -->
+<div class="decision-card">
+  <div class="badge-row">
+    <span class="badge buy">🟢 最终决策</span>
+    <span class="badge">综合信心：7.0/10</span>
+    <span class="badge">方向确信8.0 | 时机5.5</span>
+  </div>
+  <h1>BUY</h1>
+  <p class="subtitle">紫金矿业(601899.SH) — FOMC后条件执行 | 当前价格 <strong>¥31.31</strong></p>
+  <div class="metric-grid">
+    <div class="metric-item">
+      <div class="label">加权入场均价</div>
+      <div class="value">¥29.22</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">目标价 (T1/T2/T3)</div>
+      <div class="value">38 / 42 / 48</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">硬止损</div>
+      <div class="value">¥27.50</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">建议仓位</div>
+      <div class="value">40%</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Radar Chart -->
+<div class="chart-card">
+  <h2><span class="icon">📊</span> 综合评分雷达图（四维评估）</h2>
+  <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+</div>
+
+<!-- 3. Risk Reward Chart -->
+<div class="two-col">
+  <div class="chart-card">
+    <h2><span class="icon">⚖️</span> 多空论点权重对比</h2>
+    <div class="chart-wrap"><canvas id="bullBearChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2><span class="icon">🎯</span> 三批建仓风险收益</h2>
+    <div class="chart-wrap"><canvas id="riskRewardChart"></canvas></div>
+  </div>
+</div>
+
+<!-- 4. FOMC Scenario Pie -->
+<div class="two-col">
+  <div class="chart-card">
+    <h2><span class="icon">🔮</span> FOMC场景概率分布</h2>
+    <div class="chart-wrap"><canvas id="fomcPieChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2><span class="icon">📈</span> 信心水平评估</h2>
+    <div style="padding: 16px 0;">
+      <div class="confidence-bar">
+        <span class="label">方向确定性</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:80%"></div></div>
+        <span class="score">8.0/10</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="label">时机确定性</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:55%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+        <span class="score" style="color:#b45309">5.5/10</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="label">执行质量</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:75%"></div></div>
+        <span class="score">7.5/10</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="label">综合信心</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:70%"></div></div>
+        <span class="score">7.0/10</span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#64748b;margin-top:8px;">高确信BUY方向，中等确信执行时机。估值+基本面支撑方向，FOMC带来短期不确定性。</p>
+  </div>
+</div>
+
+<!-- 5. Detailed Analysis -->
+<div class="chart-card">
+  <h2><span class="icon">📝</span> 四维分析摘要</h2>
+
+  <div class="analysis-section">
+    <h3>Phase 1：分析师报告</h3>
+    <details>
+      <summary><span class="dim-label tech">技术面</span> 评分 6.5/10 — 短期强烈看多，中期仍偏空</summary>
+      <div class="content">
+        <p><strong>超短期（1-5日）：上涨</strong> — 3连阳+16.8%，MACD柱翻红，KDJ金叉，底部放量长阳</p>
+        <p><strong>中期（20-60日）：下跌</strong> — 均线空头排列，MACD零轴下方，从高点44.94回撤-40.4%</p>
+        <p><strong>关键技术信号：</strong></p>
+        <ul style="padding-left:20px;margin:8px 0;">
+          <li>⭐⭐⭐ MACD柱今日翻红（+0.108），强烈反转信号</li>
+          <li>⭐⭐⭐ KDJ金叉确认（K=46.21 > D=28.67），J值81.30强势但未过热</li>
+          <li>⭐⭐⭐ 布林下轨反弹+突破中轨（30.22），经典超卖反弹形态</li>
+          <li>⭐⭐⭐ 底部放量长阳，成交5.71亿股创可见数据新高，量比1.62</li>
+          <li>⭐⭐ 均线空头排列未改变，MA30（31.38）和MA60（32.50）是关键压力</li>
+        </ul>
+        <p><strong>强支撑：</strong>26.80（绝对底）、29.21（年线MA250）| <strong>压力位：</strong>31.38（MA30）、32.50（MA60）、33.07（布林上轨）</p>
+        <p>从44.94跌至26.80，38.2%反弹位=33.73，50%反弹位=35.87。当前31.31已反弹24.9%的回撤幅度。</p>
+      </div>
+    </details>
+    <details>
+      <summary><span class="dim-label fund">基本面</span> 评分 9.1/10 — 优质，盈利能力历史巅峰+估值历史低位</summary>
+      <div class="content">
+        <p>紫金矿业当前处于"盈利能力历史巅峰 + 估值历史低位 + 产量高速增长"的黄金窗口期。</p>
+        <p><strong>盈利能力：</strong></p>
+        <ul style="padding-left:20px;margin:8px 0;">
+          <li>2025FY：营收3,490.79亿（+14.96%），归母净利润517.77亿（+61.55%），EPS 1.95元</li>
+          <li>2026Q1：营收984.98亿（+24.79%），归母净利润200.79亿（+97.50%）</li>
+          <li>ROE 31.83%，毛利率27.73%→2026Q1 36.33%，净现比1.46x</li>
+        </ul>
+        <p><strong>成长性：</strong>2026年产量指引：铜120万吨(+10%)、金105吨(+17%)、碳酸锂12万吨(+370%)</p>
+        <p><strong>估值：</strong>PE(TTM) 13.50x，5年分位9.18%（历史绝对低位），PEG仅0.22，机构目标均价46.08元，上行空间58.4%</p>
+      </div>
+    </details>
+    <details>
+      <summary><span class="dim-label news">新闻面</span> 评分 4.5/10 — 强基本面与弱价格周期博弈</summary>
+      <div class="content">
+        <p>紫金矿业当前正处于"强基本面"与"弱价格周期"的激烈博弈期。</p>
+        <p><strong>公司重大新闻：</strong></p>
+        <ul style="padding-left:20px;margin:8px 0;">
+          <li>⚠️ Allied Gold收购案遭遇发改委延迟（重大负面）</li>
+          <li>📉 股价10日跌16.02%，主力净流出35.8亿</li>
+          <li>📊 Q1净利201亿（+97.5%），已被市场消化</li>
+          <li>🏛️ H股股东多议案高反对票</li>
+          <li>💰 分红总额+58%，比例微降至31%</li>
+        </ul>
+        <p><strong>宏观环境：</strong>金价从$5,599高点暴跌至$4,024低点（-28%），6/15反弹至$4,359；美联储6/16-17议息在即；铜价$6.491/lb，矿端紧缺（TC为负）</p>
+      </div>
+    </details>
+    <details>
+      <summary><span class="dim-label sent">情绪面</span> 评分 5.5/10 — 中性偏乐观（+0.36）</summary>
+      <div class="content">
+        <p>今日：31.31元（+7.63%），成交额177.20亿，量比1.62</p>
+        <table>
+          <tr><th>维度</th><th>方向</th></tr>
+          <tr><td>主力资金（近5日）</td><td>⚠️ 中性偏多，近2日回流+17亿</td></tr>
+          <tr><td>北向/外资</td><td>⚠️ 中性，持仓稳定</td></tr>
+          <tr><td>机构评级</td><td class="pos">🟢 极度乐观，100%买入，目标价46.08元</td></tr>
+          <tr><td>融资融券</td><td>⚠️ 中性偏多，3连增</td></tr>
+          <tr><td>筹码集中度</td><td>🟢 偏空，股东人数+12.9%</td></tr>
+        </table>
+        <p style="margin-top:8px;"><strong>核心矛盾：</strong>机构极度看好 vs 资金中期流出；短期情绪回暖 vs 筹码持续分散</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="analysis-section">
+    <h3>Phase 2：多空辩论</h3>
+    <details>
+      <summary>🔥 多头核心论点 — 信心8.5/10，预估胜率65-75%</summary>
+      <div class="content">
+        <ol style="padding-left:20px;margin:8px 0;">
+          <li><strong>估值极端低位：</strong>PE 5年分位9.18%，PEG 0.22，对比山东黄金折价47%，机构目标均价46.08元（+58.4%）</li>
+          <li><strong>业绩超级周期：</strong>Q1净利+97.5%，铜矿TC跌破-100美元（矿端议价权空前），FCF 444.47亿（+84.7%）</li>
+          <li><strong>技术信号共振：</strong>MACD翻红+KDJ金叉+布林突破+放量长阳，主力近2日回流+17亿</li>
+          <li><strong>完美催化剂：</strong>金价从$4,024反弹至$4,359（+8.3%），美联储议息在即</li>
+        </ol>
+        <p>6个月目标价：38-42元（+20-34%）| 12个月目标价：46元（+47%）</p>
+      </div>
+    </details>
+    <details>
+      <summary>🐻 空头核心论点 — 信心6.5/10，胜率50-60%</summary>
+      <div class="content">
+        <ol style="padding-left:20px;margin:8px 0;">
+          <li><strong>估值虚低：</strong>PE 13.5x建立在高金价利润上，Q2金价均值仅$4,200-4,300，TTM PE将重写至16-17x</li>
+          <li><strong>业绩不可持续：</strong>Q1 +97.5%是基数效应，金价-22%/铜价-5.7%，碳酸锂量增价跌=增收不增利</li>
+          <li><strong>死猫反弹：</strong>3日+16.8%在-40%暴跌后无说服力，J值81.30接近超买，20日净流出-89亿</li>
+          <li><strong>鹰派周期：</strong>12月加息概率82%，全球央行集体转鹰，核心PCE三个月年化3.8%</li>
+        </ol>
+        <p>熊市主逻辑（55%概率）：FOMC后回落，中期看25-28元</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- 6. Position & Entry Plan -->
+<div class="chart-card">
+  <h2><span class="icon">📋</span> 终裁仓位与入场方案</h2>
+
+  <table>
+    <thead>
+      <tr><th>参数</th><th>终裁方案</th><th>调整理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>总仓位</td><td><strong>基准40% / 上限55% / 下限25%</strong></td><td>三级框架可执行性更强</td></tr>
+      <tr><td>三批权重</td><td><strong>30% / 35% / 35%</strong></td><td>FOMC后信息优势更大，略后移</td></tr>
+      <tr><td>FOMC前仓位</td><td><strong>0%</strong></td><td>保守方在此完胜激进方</td></tr>
+      <tr><td>黄金对冲</td><td><strong>股票仓位10%</strong></td><td>管理金价尾部风险</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:24px;">🎯 入场计划</h3>
+  <table>
+    <thead>
+      <tr><th>批次</th><th>入场区间</th><th>计划占比</th><th>条件</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>第一批</td><td>29.50 - 31.50</td><td>30%</td><td>FOMC非超鹰后执行，限价单</td></tr>
+      <tr><td>第二批</td><td>28.50 - 30.50</td><td>35%</td><td>FOMC后3个交易日确认期</td></tr>
+      <tr><td>第三批</td><td>26.80 - 28.50</td><td>35%</td><td>价格回调至深度价值区</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 7. Stop Loss System -->
+<div class="chart-card">
+  <h2><span class="icon">🛑</span> 止损体系</h2>
+  <ul class="stop-rules">
+    <li><strong>软止损：</strong>收盘价跌破MA250（29.21）且3日不收回 → <strong>减仓50%</strong></li>
+    <li><strong>硬止损：</strong>价格触及27.50 → <strong>全部清仓</strong></li>
+    <li><strong>时间止损-1：</strong>FOMC后4周收盘未突破MA60（32.50） → <strong>减仓50%</strong></li>
+    <li><strong>时间止损-2：</strong>FOMC后8周收盘仍低于MA30（31.38） → <strong>清仓至观察仓5%</strong></li>
+    <li><strong>事件止损：</strong>金价跌破$3,800 / 铜价跌破$8,000 / Q2净利<120亿 → <strong>减仓至轻仓</strong></li>
+  </ul>
+
+  <h3 style="margin-top:20px;">🏆 目标价与动态止损上移</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>目标价</th><th>涨幅</th><th>时间框架</th></tr></thead>
+    <tbody>
+      <tr><td>🥇 第一目标</td><td>38.00元</td><td class="pos">+21.4%</td><td>2-3个月</td></tr>
+      <tr><td>🥈 第二目标</td><td>42.00元</td><td class="pos">+34.2%</td><td>6个月</td></tr>
+      <tr><td>🥉 终极目标</td><td>48.00元</td><td class="pos">+53.3%</td><td>12个月</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 8. FOMC Scenarios -->
+<div class="chart-card">
+  <h2><span class="icon">🔮</span> FOMC场景化执行细则</h2>
+
+  <div class="fomc-scenario dove">
+    <h4>🟢 场景A：FOMC偏鸽（概率~20%）</h4>
+    <p>6月17日市价执行第一批（30%），预计31.00-33.00。如72小时内站稳MA60（32.50），第二批移至30.50-32.00。</p>
+  </div>
+
+  <div class="fomc-scenario neutral">
+    <h4>🟡 场景B：FOMC符合预期（概率~50%）</h4>
+    <p>6月17-18日限价29.50-30.50第一批，随后3日确认期。第二、三批按原计划执行。预期均价约29.50-29.80。</p>
+  </div>
+
+  <div class="fomc-scenario hawk">
+    <h4>🟠 场景C：FOMC偏鹰（概率~25%）</h4>
+    <p>⛔ 暂停第一批建仓，观察3-5个交易日。如果价格回调至28.00-29.00且企稳，启动第一批（入场区间下调至28.00-29.50）。</p>
+  </div>
+
+  <div class="fomc-scenario super-hawk">
+    <h4>🔴 场景D：FOMC超鹰（概率~5%）— 熔断机制</h4>
+    <p>🚫 FOMC后不执行任何买入，BUY决策自动转为HOLD。等待金价企稳（$4,000以上连续5日）+ 价格不再创新低，再重新评估。此场景下仓位为0%。</p>
+  </div>
+</div>
+
+<!-- 9. Risk Assessment Rulings -->
+<div class="chart-card">
+  <h2><span class="icon">⚖️</span> 风险主管六项裁决</h2>
+
+  <table>
+    <thead><tr><th>裁决项</th><th>激进方</th><th>保守方</th><th>中性方</th><th>终裁</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>FOMC风险定价</td>
+        <td><span class="pill lose">败</span></td>
+        <td><span class="pill win">胜</span></td>
+        <td><span class="pill win">支持保守</span></td>
+        <td>定价不充分，但FOMC后执行已管理风险</td>
+      </tr>
+      <tr>
+        <td>估值优势</td>
+        <td><span class="pill win">胜</span></td>
+        <td><span class="pill partial">部分有理</span></td>
+        <td><span class="pill partial">过度谨慎</span></td>
+        <td>估值优势这一支柱稳固</td>
+      </tr>
+      <tr>
+        <td>机构资金流出</td>
+        <td><span class="pill partial">证据不足</span></td>
+        <td><span class="pill win">胜</span></td>
+        <td><span class="pill win">最公允</span></td>
+        <td>中期偏空、短期边际改善，作为仓位约束</td>
+      </tr>
+      <tr>
+        <td>仓位规模</td>
+        <td><span class="pill lose">败</span></td>
+        <td><span class="pill partial">过度保守</span></td>
+        <td><span class="pill win">胜</span></td>
+        <td>采纳中性方三级框架40%/55%/25%</td>
+      </tr>
+      <tr>
+        <td>止损价位</td>
+        <td><span class="pill partial">太深</span></td>
+        <td><span class="pill partial">太浅</span></td>
+        <td>—</td>
+        <td>软止损MA250 + 硬止损27.50</td>
+      </tr>
+      <tr>
+        <td>执行节奏</td>
+        <td><span class="pill lose">败</span></td>
+        <td><span class="pill lose">败</span></td>
+        <td><span class="pill win">胜</span></td>
+        <td>FOMC后+72小时确认期</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 10. Key Risks -->
+<div class="chart-card">
+  <h2><span class="icon">⚠️</span> 关键风险清单</h2>
+  <table class="risk-table">
+    <thead><tr><th>风险</th><th>概率</th><th>应对</th></tr></thead>
+    <tbody>
+      <tr><td>FOMC超鹰+金价跌破$3,800</td><td class="neg">5%</td><td>熔断不参与 + 黄金对冲缓冲</td></tr>
+      <tr><td>Q2业绩断崖（<120亿）</td><td class="neg">10-15%</td><td>触发事件止损→减仓至轻仓</td></tr>
+      <tr><td>铜金双杀（衰退+地产风险）</td><td class="neg">5-8%</td><td>硬止损27.50 + 对冲</td></tr>
+      <tr><td>Allied Gold审批否决</td><td style="color:#b45309;font-weight:600">8-12%</td><td>一次性冲击，不影响现有业务价值，逢低加仓</td></tr>
+      <tr><td>融资盘踩踏</td><td class="neg">5-10%</td><td>仓位上限55%限制总敞口</td></tr>
+      <tr><td>踏空风险（FOMC偏鸽）</td><td style="color:#b45309;font-weight:600">20%</td><td>第一批30%参与 + 可追第二批上调区间</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Disclaimer -->
+<div class="disclaimer">
+  ⚠️ 以上内容仅供参考，不构成投资建议。本报告综合了激进、保守、中性三方分析师的核心论点，基于Phase 1-4全部报告数据，给出风险调整后的最终交易决策。<br>
+  报告来源：learn_mcp/mult_agent/zijin-mining/20260615/ | 生成日期：2026年6月16日
+</div>
+
+<script>
+// 1. Radar Chart
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['技术面', '基本面', '新闻面', '情绪面'],
+    datasets: [{
+      label: '紫金矿业(601899)',
+      data: [6.5, 9.1, 4.5, 5.5],
+      backgroundColor: 'rgba(217, 119, 6, 0.15)',
+      borderColor: '#d97706',
+      borderWidth: 2,
+      pointBackgroundColor: '#d97706',
+      pointRadius: 5
+    }]
+  },
+  options: {
+    scales: {
+      r: {
+        min: 0, max: 10,
+        ticks: { stepSize: 2, font: { size: 11 } },
+        pointLabels: { font: { size: 14, weight: 'bold' } }
+      }
+    },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// 2. Bull vs Bear
+new Chart(document.getElementById('bullBearChart'), {
+  type: 'bar',
+  data: {
+    labels: ['估值', '业绩', '技术信号', '催化剂', '风险', '资金面'],
+    datasets: [
+      {
+        label: '多头权重',
+        data: [9, 9, 7, 6, 3, 5],
+        backgroundColor: '#10b981',
+        borderRadius: 4
+      },
+      {
+        label: '空头权重',
+        data: [5, 5, 4, 8, 8, 7],
+        backgroundColor: '#ef4444',
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    scales: {
+      x: { min: 0, max: 10, ticks: { stepSize: 2 } }
+    },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// 3. Risk Reward per Batch
+new Chart(document.getElementById('riskRewardChart'), {
+  type: 'bar',
+  data: {
+    labels: ['第一批', '第二批', '第三批', '综合'],
+    datasets: [
+      {
+        label: '潜在收益',
+        data: [23.6, 29.9, 37.4, 30.1],
+        backgroundColor: '#10b981',
+        borderRadius: 4
+      },
+      {
+        label: '潜在亏损',
+        data: [15.4, 11.1, 6.0, 11.0],
+        backgroundColor: '#ef4444',
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    scales: {
+      y: { ticks: { callback: v => v + '%' } }
+    },
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// 4. FOMC Pie
+new Chart(document.getElementById('fomcPieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['偏鸽 20%', '符合预期 50%', '偏鹰 25%', '超鹰 5%'],
+    datasets: [{
+      data: [20, 50, 25, 5],
+      backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.label
+        }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

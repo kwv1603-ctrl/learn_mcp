@@ -23,30 +23,38 @@ from finance_mcp_tools import (
     handle_validate_report,
 )
 
-SERVER_INFO = {"name": "HyperFinanceBridge", "version": "2.3.0"}
+SERVER_INFO = {"name": "HyperFinanceBridge", "version": "2.4.0"}
 PROTOCOL_VERSION = "2024-11-05"
 
 TOOLS = [
-    {"name": "get_stock_valuation", "description": "Valuation metrics", "args": ["symbol"]},
-    {"name": "get_financial_statements", "description": "Financial reports", "args": ["symbol", "quarterly?"]},
-    {"name": "get_stock_price_history", "description": "Price history", "args": ["symbol", "period?", "interval?"]},
-    {"name": "run_buffett_analysis", "description": "Buffett scoring", "args": ["symbol", "risk_free_rate?", "override_capex?", "override_growth?"]},
-    {"name": "run_finagent_strategy_scan", "description": "Technical strategies", "args": ["symbol", "period?"]},
-    {"name": "run_finagent_reflection", "description": "Price reflection", "args": ["symbol", "period?"]},
-    {"name": "get_peer_comparison", "description": "Peer valuation and profitability comparison", "args": ["symbol", "peers?"]},
-    {"name": "get_macro_context", "description": "Macro context and risk-free-rate data requirements", "args": ["market"]},
-    {"name": "run_report_readiness_check", "description": "Pre-report data availability check", "args": ["symbol", "report_path?"]},
-    {"name": "validate_report", "description": "Validate generated report structure and hard-rule compliance", "args": ["report_path"]},
+    {"name": "get_stock_valuation", "description": "Valuation metrics", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "get_financial_statements", "description": "Annual or quarterly financial reports", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "quarterly": {"type": "boolean", "default": False}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "get_stock_price_history", "description": "Price history", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "period": {"type": "string", "default": "6mo"}, "interval": {"type": "string", "default": "1d"}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "run_buffett_analysis", "description": "Buffett operating-quality score plus separate Owner Earnings and DCF diagnostics", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "risk_free_rate": {"type": "number", "description": "Decimal rate, e.g. 0.044 for 4.4%"}, "override_capex": {"type": "number", "description": "Verified total CapEx override"}, "override_maintenance_capex": {"type": "number", "description": "Verified maintenance CapEx used exactly without another heuristic"}, "override_growth": {"type": "number", "description": "Documented long-cycle growth rate in decimal form"}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "run_finagent_strategy_scan", "description": "Technical strategies", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "period": {"type": "string", "default": "6mo"}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "run_finagent_reflection", "description": "Multi-timeframe trend reflection and structured rating constraint", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "period": {"type": "string", "default": "3mo"}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "get_peer_comparison", "description": "Peer valuation and profitability comparison", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "peers": {"type": "array", "items": {"type": "string"}, "minItems": 1}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "get_macro_context", "description": "Macro context and same-market risk-free-rate data requirements", "inputSchema": {"type": "object", "properties": {"market": {"type": "string", "enum": ["USA", "CHN", "HKG", "TWN"]}}, "required": ["market"], "additionalProperties": False}},
+    {"name": "run_report_readiness_check", "description": "Pre-report annual, quarterly, valuation, score and evidence availability check", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "report_path": {"type": "string"}, "peers": {"type": "array", "items": {"type": "string"}}}, "required": ["symbol"], "additionalProperties": False}},
+    {"name": "validate_report", "description": "Validate generated report structure, numeric logic and hard-rule compliance", "inputSchema": {"type": "object", "properties": {"report_path": {"type": "string"}}, "required": ["report_path"], "additionalProperties": False}},
 ]
 
 
 def list_tools():
-    # MCP clients only require name/description; args stay as lightweight local documentation.
-    return {"tools": [{"name": t["name"], "description": t["description"]} for t in TOOLS]}
+    return {"tools": TOOLS}
 
 
 async def call_tool(tool_name, args):
     args = args or {}
+    tool_definition = next((tool for tool in TOOLS if tool["name"] == tool_name), None)
+    if tool_definition is None:
+        return {"error": f"Unknown tool: {tool_name}"}
+    missing_required = [
+        key for key in tool_definition["inputSchema"].get("required", [])
+        if args.get(key) in (None, "")
+    ]
+    if missing_required:
+        return {"error": f"Missing required arguments: {', '.join(missing_required)}"}
     if tool_name == "get_stock_valuation":
         return await handle_get_stock_valuation(args.get("symbol"))
     if tool_name == "get_financial_statements":
@@ -58,7 +66,8 @@ async def call_tool(tool_name, args):
             args.get("symbol"),
             risk_free_rate=args.get("risk_free_rate"),
             override_capex=args.get("override_capex"),
-            override_growth=args.get("override_growth")
+            override_growth=args.get("override_growth"),
+            override_maintenance_capex=args.get("override_maintenance_capex"),
         )
     if tool_name == "run_finagent_strategy_scan":
         return await handle_run_finagent_strategy_scan(args.get("symbol"), args.get("period", "6mo"))
@@ -69,7 +78,7 @@ async def call_tool(tool_name, args):
     if tool_name == "get_macro_context":
         return await handle_get_macro_context(args.get("market"))
     if tool_name == "run_report_readiness_check":
-        return await handle_run_report_readiness_check(args.get("symbol"), args.get("report_path"))
+        return await handle_run_report_readiness_check(args.get("symbol"), args.get("report_path"), args.get("peers"))
     if tool_name == "validate_report":
         return await handle_validate_report(args.get("report_path"))
     return {"error": f"Unknown tool: {tool_name}"}
