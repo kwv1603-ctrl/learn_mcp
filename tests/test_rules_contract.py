@@ -164,6 +164,17 @@ class RulesContractTests(unittest.TestCase):
         self.assertIn("unresolved_placeholders", issue_types)
         self.assertIn("scenario_probability_unverified", issue_types)
 
+    def test_template_requires_sotp_multiple_and_cash_flow_validation(self):
+        template = Path("report_template.md").read_text(encoding="utf-8")
+        rules = Path("rules.md").read_text(encoding="utf-8")
+
+        self.assertIn("SOTP 分部估值 → 隐含 EV/EBIT 验证 → 正常化 FCF/DCF 验证", template)
+        self.assertIn("近端增长率", template)
+        self.assertIn("稳定期增长率", template)
+        self.assertIn("SOTP 隐含 FCF Yield", template)
+        self.assertIn("不得把三种结果简单平均", template)
+        self.assertIn("SOTP → 隐含 EV/EBIT → 正常化 FCF/DCF", rules)
+
     def test_complete_v2_report_can_pass_validation(self):
         report_path = Path.cwd() / "reports" / "TEST_analysis_20260722.md"
         report_text = _render_complete_v2_report()
