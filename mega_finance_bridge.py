@@ -1,5 +1,5 @@
 """
-HyperFinanceBridge v2.3 — thin MCP JSON-RPC entrypoint.
+HyperFinanceBridge v2.5 — thin MCP JSON-RPC entrypoint.
 
 This file keeps the MCP surface visible: tool names, descriptions, and argument
 dispatch live here. Heavy financial-data and report-validation implementations
@@ -22,8 +22,12 @@ from finance_mcp_tools import (
     handle_run_report_readiness_check,
     handle_validate_report,
 )
+from skills.position_manager import (
+    calculate_core_tactical_plan,
+    calculate_position_plan,
+)
 
-SERVER_INFO = {"name": "HyperFinanceBridge", "version": "2.4.0"}
+SERVER_INFO = {"name": "HyperFinanceBridge", "version": "2.6.0"}
 PROTOCOL_VERSION = "2024-11-05"
 
 TOOLS = [
@@ -37,6 +41,59 @@ TOOLS = [
     {"name": "get_macro_context", "description": "Macro context and same-market risk-free-rate data requirements", "inputSchema": {"type": "object", "properties": {"market": {"type": "string", "enum": ["USA", "CHN", "HKG", "TWN"]}}, "required": ["market"], "additionalProperties": False}},
     {"name": "run_report_readiness_check", "description": "Pre-report annual, quarterly, valuation, score and evidence availability check", "inputSchema": {"type": "object", "properties": {"symbol": {"type": "string"}, "report_path": {"type": "string"}, "peers": {"type": "array", "items": {"type": "string"}}}, "required": ["symbol"], "additionalProperties": False}},
     {"name": "validate_report", "description": "Validate generated report structure, numeric logic and hard-rule compliance", "inputSchema": {"type": "object", "properties": {"report_path": {"type": "string"}}, "required": ["report_path"], "additionalProperties": False}},
+    {
+        "name": "calculate_position_plan",
+        "description": "Risk-first position size, stop-loss and staged take-profit plan",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "account_equity": {"type": "number", "exclusiveMinimum": 0, "description": "Total account equity"},
+                "entry_price": {"type": "number", "exclusiveMinimum": 0},
+                "side": {"type": "string", "enum": ["long", "short"], "default": "long"},
+                "risk_profile": {"type": "string", "enum": ["conservative", "balanced", "aggressive"], "default": "balanced"},
+                "stop_method": {"type": "string", "enum": ["price", "percent", "atr"], "default": "percent"},
+                "stop_price": {"type": "number", "exclusiveMinimum": 0, "description": "Required for stop_method=price"},
+                "stop_percent": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 100, "description": "Percentage points; 8 means 8%. Defaults to 8 for stop_method=percent"},
+                "atr": {"type": "number", "exclusiveMinimum": 0, "description": "Required for stop_method=atr"},
+                "atr_multiplier": {"type": "number", "exclusiveMinimum": 0, "default": 2},
+                "risk_per_trade_pct": {"type": "number", "exclusiveMinimum": 0, "description": "Optional preset override in percentage points; 0.5 means 0.5%"},
+                "max_portfolio_risk_pct": {"type": "number", "exclusiveMinimum": 0, "description": "Optional preset override; total open risk as percentage points of equity"},
+                "current_open_risk": {"type": "number", "minimum": 0, "default": 0, "description": "Current open risk in account currency, not position market value"},
+                "max_position_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Optional preset override; maximum position value as percentage points of equity"},
+                "capital_available": {"type": "number", "minimum": 0, "description": "Cash or notional capacity available; defaults to account equity"},
+                "lot_size": {"type": "number", "exclusiveMinimum": 0, "default": 1},
+                "round_trip_cost_bps": {"type": "number", "minimum": 0, "exclusiveMaximum": 10000, "default": 20, "description": "Estimated fees plus slippage for entry and exit, in basis points"},
+                "target_r_multiples": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 1, "default": [1, 2, 3]},
+                "target_allocations_pct": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 1, "default": [30, 40, 30], "description": "Percentage points allocated to each target; must sum to 100"}
+            },
+            "required": ["account_equity", "entry_price"],
+            "additionalProperties": False
+        }
+    },
+    {
+        "name": "calculate_core_tactical_plan",
+        "description": "Split one security into a protected core holding and a capped tactical high-sell/low-buy sleeve",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "account_equity": {"type": "number", "exclusiveMinimum": 0},
+                "reference_price": {"type": "number", "exclusiveMinimum": 0},
+                "symbol": {"type": "string"},
+                "max_symbol_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100, "default": 8, "description": "Maximum security exposure as percentage points of account equity"},
+                "core_pct_of_symbol": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 100, "default": 60, "description": "Core sleeve as percentage points of maximum security exposure"},
+                "initial_tactical_deployment_pct": {"type": "number", "minimum": 0, "maximum": 100, "default": 50, "description": "Share of tactical capacity initially held as shares; the rest remains a buy-low cash reserve"},
+                "grid_step_pct": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 100, "default": 5},
+                "grid_levels": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3},
+                "lot_size": {"type": "number", "exclusiveMinimum": 0, "default": 1},
+                "tactical_stop_pct": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 100, "default": 20},
+                "sell_allocations_pct": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 1, "description": "One item per grid level; must sum to 100"},
+                "buy_allocations_pct": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 1, "description": "One item per grid level; must sum to 100"},
+                "current_quantity": {"type": "number", "minimum": 0}
+            },
+            "required": ["account_equity", "reference_price"],
+            "additionalProperties": False
+        }
+    },
 ]
 
 
@@ -81,6 +138,16 @@ async def call_tool(tool_name, args):
         return await handle_run_report_readiness_check(args.get("symbol"), args.get("report_path"), args.get("peers"))
     if tool_name == "validate_report":
         return await handle_validate_report(args.get("report_path"))
+    if tool_name == "calculate_position_plan":
+        try:
+            return calculate_position_plan(**args)
+        except ValueError as exc:
+            return {"status": "error", "error": str(exc)}
+    if tool_name == "calculate_core_tactical_plan":
+        try:
+            return calculate_core_tactical_plan(**args)
+        except ValueError as exc:
+            return {"status": "error", "error": str(exc)}
     return {"error": f"Unknown tool: {tool_name}"}
 
 
